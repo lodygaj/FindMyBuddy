@@ -1,0 +1,18 @@
+<resources>
+
+    <string name="app_name">Find My Buddy</string>
+    <string name="textViewUsername">Username:</string>
+    <string name="textViewPassword">Password:</string>
+    <string name="findMyBuddy">Find My Buddy!</string>
+    <string name="buttonSubmit">Submit</string>
+    <string name="textViewPasswordConfirm">Confirm Password</string>
+    <string name="textViewEmail">Email:</string>
+    <string name="textViewEmailConfirm">Confirm Email:</string>
+    <string name="textViewLastName">Last Name:</string>
+    <string name="textViewFirstName">First Name:</string>
+    <string name="buttonCancel">Cancel</string>
+    <string name="title_activity_map">Map</string>
+
+    <string name="google_android_map_api_key">AIzaSyC6HpovglKsmnD0qyzEUS15AwZf3XMmAMU</string>
+
+</resources>

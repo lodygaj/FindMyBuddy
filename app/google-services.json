@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "799959531260",
+    "firebase_url": "https://findmybuddy-e2830.firebaseio.com",
+    "project_id": "findmybuddy-e2830",
+    "storage_bucket": "findmybuddy-e2830.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:799959531260:android:190072a022976764",
+        "android_client_info": {
+          "package_name": "com.lodygaj.findmybuddy"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "799959531260-p5l133cbcc28o4mgmeg2edgqg3d9hg0u.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBc6O36Ys5MVQvllaRt5IeErtm0ywBbqKE"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
