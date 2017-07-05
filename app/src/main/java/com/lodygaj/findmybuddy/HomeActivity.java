@@ -12,6 +12,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import com.google.firebase.messaging.FirebaseMessaging;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -112,7 +114,8 @@ public class HomeActivity extends AppCompatActivity {
         private Context context;
         private String user, timestamp;
         private Double latitude, longitude;
-        private final String serverURL = "http://jlodyga.000webhostapp.com/setLocation.php";
+        //private final String serverURL = "http://jlodyga.000webhostapp.com/setLocation.php";
+        private final String serverURL = "https://lodygaj.localtunnel.me/setLocation.php";
 
         public AsyncSetLocation(Context context, String user, Double latitude, Double longitude, String timestamp) {
             this.context = context;
@@ -174,7 +177,8 @@ public class HomeActivity extends AppCompatActivity {
         private Context context;
         private String friend;
         private String parameters;
-        private final String serverURL = "http://jlodyga.000webhostapp.com/getLocation.php";
+        //private final String serverURL = "http://jlodyga.000webhostapp.com/getLocation.php";
+        private final String serverURL = "https://lodygaj.localtunnel.me/getLocation.php";
 
         public AsyncGetLocation(Context context, String friend) {
             this.context = context;

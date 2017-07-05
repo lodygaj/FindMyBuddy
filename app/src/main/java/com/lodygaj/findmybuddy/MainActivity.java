@@ -87,7 +87,8 @@ public class MainActivity extends AppCompatActivity {
         private String parameters;
         private Context context;
         private String username, password;
-        private final String serverURL = "http://jlodyga.000webhostapp.com/login.php";
+        //private final String serverURL = "http://jlodyga.000webhostapp.com/login.php";
+        private final String serverURL = "https://lodygaj.localtunnel.me/login.php";
 
         public AsyncLogin(Context context, String username, String password) {
             this.context = context;
@@ -135,8 +136,10 @@ public class MainActivity extends AppCompatActivity {
                 // Start menu activity
                 Intent homeStartIntent = new Intent(context, HomeActivity.class);
                 context.startActivity(homeStartIntent);
-            } else {
+            } else if (value.equals("0")) {
                 Toast.makeText(context, "Wrong username or Password!", Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(context, "Cannot connect to server!", Toast.LENGTH_LONG).show();
             }
         }
     }

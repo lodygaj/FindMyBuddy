@@ -23,6 +23,7 @@ import android.widget.Toast;
 
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.FirebaseInstanceIdService;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -40,28 +41,17 @@ public class MyFirebaseInstanceIDService extends FirebaseInstanceIdService {
      * the previous token had been compromised. Note that this is called when the InstanceID token
      * is initially generated so this is where you would retrieve the token.
      */
-    // [START refresh_token]
     @Override
     public void onTokenRefresh() {
         // Get updated InstanceID token.
         String refreshedToken = FirebaseInstanceId.getInstance().getToken();
         Log.d(TAG, "Refreshed token: " + refreshedToken);
 
-        // If you want to send messages to this application instance or
-        // manage this apps subscriptions on the server side, send the
-        // Instance ID token to your app server.
+        // Update token in databse
         sendRegistrationToServer(refreshedToken);
     }
-    // [END refresh_token]
 
-    /**
-     * Persist token to third-party servers.
-     *
-     * Modify this method to associate the user's FCM InstanceID token with any server-side account
-     * maintained by your application.
-     *
-     * @param token The new token.
-     */
+    // Method called to update token in database
     private void sendRegistrationToServer(String token) {
         // Submit new token to database
         new AsyncUpdateFcm(this).execute(SaveSharedPreference.getUserName(getApplicationContext()), token);
@@ -75,7 +65,8 @@ public class MyFirebaseInstanceIDService extends FirebaseInstanceIdService {
         private String username;
         private String fcmToken;
         private Context context;
-        private String serverURL = "http://jlodyga.000webhostapp.com/updateFcmToken.php";
+        //private String serverURL = "http://jlodyga.000webhostapp.com/updateFcmToken.php";
+        private String serverURL = "https://lodygaj.localtunnel.me/updateFcmToken.php";
 
         public AsyncUpdateFcm(Context context) {
             this.context = context;

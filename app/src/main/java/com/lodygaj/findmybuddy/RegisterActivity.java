@@ -11,6 +11,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -109,7 +110,8 @@ public class RegisterActivity extends AppCompatActivity {
         private String parameters;
         private String username;
         private Context context;
-        private String serverURL = "http://jlodyga.000webhostapp.com/register.php";
+        //private String serverURL = "http://jlodyga.000webhostapp.com/register.php";
+        private String serverURL = "https://lodygaj.localtunnel.me/register.php";
 
         public AsyncRegister(Context context) {
             this.context = context;
@@ -162,9 +164,11 @@ public class RegisterActivity extends AppCompatActivity {
             if (value.equals("1")) {
                 // Set username in shared preferences
                 SaveSharedPreference.setUserName(context, username);
+
                 // Go to Home Activity
                 Intent homeStartIntent = new Intent(context, HomeActivity.class);
                 context.startActivity(homeStartIntent);
+
                 Toast.makeText(context, "User successfully created!", Toast.LENGTH_LONG).show();
             } else {
                 Toast.makeText(context, "Username already taken!", Toast.LENGTH_LONG).show();

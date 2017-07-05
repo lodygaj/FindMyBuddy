@@ -20,6 +20,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by Joey Laptop on 6/29/2017.
@@ -66,7 +68,7 @@ public class UserFragment extends Fragment {
         btnSendRequest.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-               // TODO add functionality
+
             }
         });
 
@@ -87,7 +89,8 @@ public class UserFragment extends Fragment {
         private Context context;
         private String friend;
         private String parameters;
-        private final String serverURL = "http://jlodyga.000webhostapp.com/getLocation.php";
+        //private final String serverURL = "http://jlodyga.000webhostapp.com/getLocation.php";
+        private final String serverURL = "https://lodygaj.localtunnel.me/getLocation.php";
 
         public AsyncGetLocation(Context context, String friend) {
             this.context = context;
