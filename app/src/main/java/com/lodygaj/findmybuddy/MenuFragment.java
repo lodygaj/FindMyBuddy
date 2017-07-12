@@ -223,8 +223,8 @@ public class MenuFragment extends Fragment {
         private String parameters;
         private Context context;
         private String user, friend;
-        //private final String serverURL = "http://jlodyga.000webhostapp.com/addFriend.php";
-        private final String serverURL = "https://lodygaj.localtunnel.me/addFriend.php";
+        private final String serverURL = "http://jlodyga.000webhostapp.com/addFriend.php";
+        //private final String serverURL = "https://lodygaj.localtunnel.me/addFriend.php";
 
         public AsyncAddFriend(Context context, String user, String friend) {
             this.context = context;
@@ -286,8 +286,8 @@ public class MenuFragment extends Fragment {
         private String parameters;
         private Context context;
         private String user, friend;
-        //private final String serverURL = "http://jlodyga.000webhostapp.com/deleteFriend.php";
-        private final String serverURL = "https://lodygaj.localtunnel.me/deleteFriend.php";
+        private final String serverURL = "http://jlodyga.000webhostapp.com/deleteFriend.php";
+        //private final String serverURL = "https://lodygaj.localtunnel.me/deleteFriend.php";
 
         public AsyncDeleteFriend(Context context, String user, String friend) {
             this.context = context;

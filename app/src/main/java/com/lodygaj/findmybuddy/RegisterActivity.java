@@ -110,8 +110,8 @@ public class RegisterActivity extends AppCompatActivity {
         private String parameters;
         private String username;
         private Context context;
-        //private String serverURL = "http://jlodyga.000webhostapp.com/register.php";
-        private String serverURL = "https://lodygaj.localtunnel.me/register.php";
+        private String serverURL = "http://jlodyga.000webhostapp.com/register.php";
+        //private String serverURL = "https://lodygaj.localtunnel.me/register.php";
 
         public AsyncRegister(Context context) {
             this.context = context;

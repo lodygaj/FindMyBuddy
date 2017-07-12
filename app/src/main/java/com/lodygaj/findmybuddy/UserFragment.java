@@ -89,8 +89,8 @@ public class UserFragment extends Fragment {
         private Context context;
         private String friend;
         private String parameters;
-        //private final String serverURL = "http://jlodyga.000webhostapp.com/getLocation.php";
-        private final String serverURL = "https://lodygaj.localtunnel.me/getLocation.php";
+        private final String serverURL = "http://jlodyga.000webhostapp.com/getLocation.php";
+        //private final String serverURL = "https://lodygaj.localtunnel.me/getLocation.php";
 
         public AsyncGetLocation(Context context, String friend) {
             this.context = context;

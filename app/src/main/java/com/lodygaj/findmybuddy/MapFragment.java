@@ -11,6 +11,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
@@ -62,15 +63,22 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         Double userLat = locationFinder.getLatitude();
         Double userLong = locationFinder.getLongitude();
 
+        LatLng friendPoint = new LatLng(latitude, longitude);
 
         mMap = googleMap;
+
+        mMap.getUiSettings().setZoomControlsEnabled(true);
+        mMap.getUiSettings().setCompassEnabled(true);
+
         mMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
-        LatLng friendPoint = new LatLng(latitude, longitude);
+
         mMap.addMarker(new MarkerOptions().position(friendPoint).title(friend));
+
         if(!friend.equals(user)) {
             LatLng userPoint = new LatLng(userLat, userLong);
             mMap.addMarker(new MarkerOptions().position(userPoint).title(user));
         }
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(friendPoint, 16.0f));
+
     }
 }
