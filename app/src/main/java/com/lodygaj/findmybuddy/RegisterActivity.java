@@ -122,7 +122,7 @@ public class RegisterActivity extends AppCompatActivity {
                         user.setLastName(lastName);
                         user.setLatitude(0.0);
                         user.setLongitude(0.0);
-                        user.setTimestamp("");
+                        user.setTimestamp("N/A");
 
                         // Add user to database
                         runnable = new Runnable() {
