@@ -18,6 +18,11 @@ import android.widget.ListView;
 import android.widget.PopupMenu;
 import android.widget.Toast;
 
+import com.amazonaws.auth.CognitoCachingCredentialsProvider;
+import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBMapper;
+import com.amazonaws.regions.Regions;
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -38,6 +43,7 @@ public class MenuFragment extends Fragment {
     public EditText edtTxtFriend;
     public Button btnAddFriend;
     public String user, friend;
+    private DynamoDBMapper mapper;
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
@@ -55,6 +61,19 @@ public class MenuFragment extends Fragment {
         user = SaveSharedPreference.getUserName(context);
 
         contacts = new String[] {"Loading..."};
+
+        // Initialize the Amazon Cognito credentials provider
+        CognitoCachingCredentialsProvider credentialsProvider = new CognitoCachingCredentialsProvider(
+                getActivity().getApplicationContext(),
+                "us-east-1:88f63976-d65f-4215-8dae-f887b0421644", // Identity pool ID
+                Regions.US_EAST_1 // Region
+        );
+
+        // Initialize Amazon DynamoDB client
+        AmazonDynamoDBClient ddbClient = new AmazonDynamoDBClient(credentialsProvider);
+
+        // Initialize DynamoDB object mapper
+        mapper = new DynamoDBMapper(ddbClient);
 
         // Create contact list adapter
         cAdapter = new ContactAdapter(context, contacts);

@@ -12,6 +12,11 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.amazonaws.auth.CognitoCachingCredentialsProvider;
+import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBMapper;
+import com.amazonaws.regions.Regions;
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -31,9 +36,10 @@ public class UserFragment extends Fragment {
     private Context context;
     private FragmentManager fm;
     private Button btnLastKnown, btnSendRequest;
-    private double latitude, longitude;
-    private String user, friend, time;
+    private String friend;
     private TextView txtUser;
+    private DynamoDBMapper mapper;
+    private User selectedUser;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -56,11 +62,53 @@ public class UserFragment extends Fragment {
         //  Set friend title
         txtUser.setText(friend);
 
+        // Initialize the Amazon Cognito credentials provider
+        CognitoCachingCredentialsProvider credentialsProvider = new CognitoCachingCredentialsProvider(
+                getActivity().getApplicationContext(),
+                "us-east-1:88f63976-d65f-4215-8dae-f887b0421644", // Identity pool ID
+                Regions.US_EAST_1 // Region
+        );
+
+        // Initialize Amazon DynamoDB client
+        AmazonDynamoDBClient ddbClient = new AmazonDynamoDBClient(credentialsProvider);
+
+        // Initialize DynamoDB object mapper
+        mapper = new DynamoDBMapper(ddbClient);
+
         // Called when add friend button is clicked
         btnLastKnown.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                new AsyncGetLocation(context, friend).execute();
+                //new AsyncGetLocation(context, friend).execute();
+
+                // Get user info from database
+                Runnable runnable = new Runnable() {
+                    public void run() {
+                        selectedUser = mapper.load(User.class, friend);
+                    }
+                };
+                Thread mythread = new Thread(runnable);
+                mythread.start();
+                // Wait for thread to complete
+                try {
+                    mythread.join();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                // Add data to bundle
+                Bundle b = new Bundle();
+                b.putString("Friend", selectedUser.getUsername());
+                b.putDouble("Latitude", selectedUser.getLatitude());
+                b.putDouble("Longitude", selectedUser.getLongitude());
+                b.putString("Time", selectedUser.getTimestamp());
+
+                Toast.makeText(getActivity().getApplicationContext(), selectedUser.getTimestamp(), Toast.LENGTH_LONG).show();
+
+                // Set map fragment
+                MapFragment mapFragment = new MapFragment();
+                mapFragment.setArguments(b); // set bundle
+                setFragment(mapFragment);
             }
         });
 
@@ -82,91 +130,91 @@ public class UserFragment extends Fragment {
     }
 
 
-    /**
-     * Class used for retrieving friends location data
-     */
-    public class AsyncGetLocation extends AsyncTask<String, Void, String> {
-        private Context context;
-        private String friend;
-        private String parameters;
-        private final String serverURL = "http://jlodyga.com/server/getLocation.php";
-
-        public AsyncGetLocation(Context context, String friend) {
-            this.context = context;
-            this.friend = friend;
-        }
-
-        @Override
-        protected void onPreExecute() {}
-
-        @Override
-        protected String doInBackground(String... arg0) {
-            //android.os.Debug.waitForDebugger();
-            parameters = "user=" + friend;
-            try {
-                URL url = new URL(serverURL);
-                URLConnection con = url.openConnection();
-
-                con.setDoOutput(true);
-                OutputStreamWriter wr = new OutputStreamWriter(con.getOutputStream());
-
-                wr.write(parameters);
-                wr.flush();
-                wr.close();
-
-                BufferedReader reader = new BufferedReader(new InputStreamReader(con.getInputStream()));
-                StringBuilder sb = new StringBuilder();
-                String line = "";
-
-                while((line = reader.readLine()) != null) {
-                    sb.append(line);
-                    break;
-                }
-
-                String result = sb.toString();
-                return result;
-            }
-            catch(Exception e) {
-                return new String("Exception: " + e.getMessage());
-            }
-        }
-
-        @Override
-        public void onPostExecute(String array) {
-            //android.os.Debug.waitForDebugger();
-            try {
-                // Create JSON array from input value
-                JSONArray jArray = new JSONArray(array);
-                // Create final array to be returned
-                String[] friends = new String[jArray.length()];
-                // Add each object from JSON Array to final array
-                for (int i = 0; i < jArray.length(); i++) {
-                    JSONObject object = jArray.getJSONObject(i);
-                    friends[i] = object.getString(Integer.toString(i));
-                }
-
-                latitude = Double.parseDouble(friends[0]);
-                longitude = Double.parseDouble(friends[1]);
-                time = friends[2];
-
-                // Add data to bundle
-                Bundle b = new Bundle();
-                b.putString("Friend", friend);
-                b.putDouble("Latitude", latitude);
-                b.putDouble("Longitude", longitude);
-                b.putString("Time", time);
-
-                Toast.makeText(context, time, Toast.LENGTH_LONG).show();
-
-                // Set map fragment
-                MapFragment mapFragment = new MapFragment();
-                mapFragment.setArguments(b); // set bundle
-                setFragment(mapFragment);
-            }
-            catch(Exception e) {
-                System.out.println("Exception: " + e.getMessage());
-            }
-        }
-    }
+//    /**
+//     * Class used for retrieving friends location data
+//     */
+//    public class AsyncGetLocation extends AsyncTask<String, Void, String> {
+//        private Context context;
+//        private String friend;
+//        private String parameters;
+//        private final String serverURL = "http://jlodyga.com/server/getLocation.php";
+//
+//        public AsyncGetLocation(Context context, String friend) {
+//            this.context = context;
+//            this.friend = friend;
+//        }
+//
+//        @Override
+//        protected void onPreExecute() {}
+//
+//        @Override
+//        protected String doInBackground(String... arg0) {
+//            //android.os.Debug.waitForDebugger();
+//            parameters = "user=" + friend;
+//            try {
+//                URL url = new URL(serverURL);
+//                URLConnection con = url.openConnection();
+//
+//                con.setDoOutput(true);
+//                OutputStreamWriter wr = new OutputStreamWriter(con.getOutputStream());
+//
+//                wr.write(parameters);
+//                wr.flush();
+//                wr.close();
+//
+//                BufferedReader reader = new BufferedReader(new InputStreamReader(con.getInputStream()));
+//                StringBuilder sb = new StringBuilder();
+//                String line = "";
+//
+//                while((line = reader.readLine()) != null) {
+//                    sb.append(line);
+//                    break;
+//                }
+//
+//                String result = sb.toString();
+//                return result;
+//            }
+//            catch(Exception e) {
+//                return new String("Exception: " + e.getMessage());
+//            }
+//        }
+//
+//        @Override
+//        public void onPostExecute(String array) {
+//            //android.os.Debug.waitForDebugger();
+//            try {
+//                // Create JSON array from input value
+//                JSONArray jArray = new JSONArray(array);
+//                // Create final array to be returned
+//                String[] friends = new String[jArray.length()];
+//                // Add each object from JSON Array to final array
+//                for (int i = 0; i < jArray.length(); i++) {
+//                    JSONObject object = jArray.getJSONObject(i);
+//                    friends[i] = object.getString(Integer.toString(i));
+//                }
+//
+//                latitude = Double.parseDouble(friends[0]);
+//                longitude = Double.parseDouble(friends[1]);
+//                time = friends[2];
+//
+//                // Add data to bundle
+//                Bundle b = new Bundle();
+//                b.putString("Friend", friend);
+//                b.putDouble("Latitude", latitude);
+//                b.putDouble("Longitude", longitude);
+//                b.putString("Time", time);
+//
+//                Toast.makeText(context, time, Toast.LENGTH_LONG).show();
+//
+//                // Set map fragment
+//                MapFragment mapFragment = new MapFragment();
+//                mapFragment.setArguments(b); // set bundle
+//                setFragment(mapFragment);
+//            }
+//            catch(Exception e) {
+//                System.out.println("Exception: " + e.getMessage());
+//            }
+//        }
+//    }
 
 }
