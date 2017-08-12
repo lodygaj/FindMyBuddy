@@ -110,8 +110,7 @@ public class RegisterActivity extends AppCompatActivity {
         private String parameters;
         private String username;
         private Context context;
-        private String serverURL = "http://jlodyga.000webhostapp.com/register.php";
-        //private String serverURL = "https://lodygaj.localtunnel.me/register.php";
+        private String serverURL = "http://jlodyga.com/server/register.php";
 
         public AsyncRegister(Context context) {
             this.context = context;
@@ -127,11 +126,9 @@ public class RegisterActivity extends AppCompatActivity {
                 String email = (String) arg0[2];
                 String firstName = (String) arg0[3];
                 String lastName = (String) arg0[4];
-                // Get FCM token
-                String token = FirebaseInstanceId.getInstance().getToken();
 
                 parameters = "username=" + username + "&password=" + password + "&email=" + email +
-                        "&firstName=" + firstName + "&lastName=" + lastName + "&fcmToken=" + token;
+                        "&firstName=" + firstName + "&lastName=" + lastName;
 
                 URL url = new URL(serverURL);
                 URLConnection con = url.openConnection();

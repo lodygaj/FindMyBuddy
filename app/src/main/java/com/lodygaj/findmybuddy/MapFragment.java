@@ -70,7 +70,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         mMap.getUiSettings().setZoomControlsEnabled(true);
         mMap.getUiSettings().setCompassEnabled(true);
 
-        mMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+        mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
 
         mMap.addMarker(new MarkerOptions().position(friendPoint).title(friend));
 

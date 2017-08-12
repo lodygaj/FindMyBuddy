@@ -87,8 +87,7 @@ public class MainActivity extends AppCompatActivity {
         private String parameters;
         private Context context;
         private String username, password;
-        private final String serverURL = "http://jlodyga.000webhostapp.com/login.php";
-        //private final String serverURL = "https://lodygaj.localtunnel.me/login.php";
+        private final String serverURL = "http://jlodyga.com/server/login.php";
 
         public AsyncLogin(Context context, String username, String password) {
             this.context = context;

@@ -141,8 +141,7 @@ public class MenuFragment extends Fragment {
         private Context context;
         private String user;
         private String parameters;
-        //private final String serverURL = "http://jlodyga.000webhostapp.com/getFriends.php";
-        private final String serverURL = "https://lodygaj.localtunnel.me/getFriends.php";
+        private final String serverURL = "http://jlodyga.com/server/getFriends.php";
 
         public AsyncGetFriends(Context context, String user) {
             this.context = context;
@@ -209,8 +208,7 @@ public class MenuFragment extends Fragment {
                 cAdapter.notifyDataSetChanged();
             } catch(Exception e) {
                 System.out.println("Exception: " + e.getMessage());
-                cAdapter.contacts[0] = "didn't";
-                cAdapter.contacts[1] = "work";
+                cAdapter.contacts[0] = "server error";
                 cAdapter.notifyDataSetChanged();
             }
         }
@@ -223,8 +221,7 @@ public class MenuFragment extends Fragment {
         private String parameters;
         private Context context;
         private String user, friend;
-        private final String serverURL = "http://jlodyga.000webhostapp.com/addFriend.php";
-        //private final String serverURL = "https://lodygaj.localtunnel.me/addFriend.php";
+        private final String serverURL = "http://jlodyga.com/server/addFriend.php";
 
         public AsyncAddFriend(Context context, String user, String friend) {
             this.context = context;
@@ -286,8 +283,7 @@ public class MenuFragment extends Fragment {
         private String parameters;
         private Context context;
         private String user, friend;
-        private final String serverURL = "http://jlodyga.000webhostapp.com/deleteFriend.php";
-        //private final String serverURL = "https://lodygaj.localtunnel.me/deleteFriend.php";
+        private final String serverURL = "http://jlodyga.com/server/deleteFriend.php";
 
         public AsyncDeleteFriend(Context context, String user, String friend) {
             this.context = context;
