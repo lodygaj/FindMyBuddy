@@ -214,7 +214,7 @@ public class MenuFragment extends Fragment {
         String[] friends = new String[result.size()];
         int index = 0;
         for(Friends friend: result) {
-            friends[index++] = friend.getFriend().toLowerCase();
+            friends[index++] = friend.getFriend();
         }
 
         return friends;
