@@ -48,12 +48,12 @@ public class UserFragment extends Fragment {
         context = getActivity().getApplicationContext();
         fm = getFragmentManager();
 
-        // Create objects
+        // Get objects from layout
         txtUser = (TextView) view.findViewById(R.id.txtUsername);
         btnLastKnown = (Button) view.findViewById(R.id.btnLastKnown);
         btnSendRequest = (Button) view.findViewById(R.id.btnLocRequest);
 
-        // Get friend from bundle
+        // Get friend data from bundle
         Bundle b = this.getArguments();
         if(b != null){
             friend = b.getString("Friend");
@@ -96,14 +96,12 @@ public class UserFragment extends Fragment {
                     e.printStackTrace();
                 }
 
-                // Add data to bundle
+                // Add user data to bundle
                 Bundle b = new Bundle();
                 b.putString("Friend", selectedUser.getUsername());
                 b.putDouble("Latitude", selectedUser.getLatitude());
                 b.putDouble("Longitude", selectedUser.getLongitude());
                 b.putString("Time", selectedUser.getTimestamp());
-
-                Toast.makeText(getActivity().getApplicationContext(), selectedUser.getTimestamp(), Toast.LENGTH_LONG).show();
 
                 // Set map fragment
                 MapFragment mapFragment = new MapFragment();
@@ -112,7 +110,7 @@ public class UserFragment extends Fragment {
             }
         });
 
-        // Called when add friend button is clicked
+        // Called when send location request button is clicked
         btnSendRequest.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

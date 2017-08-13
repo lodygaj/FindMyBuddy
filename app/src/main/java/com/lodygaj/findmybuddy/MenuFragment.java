@@ -58,15 +58,13 @@ public class MenuFragment extends Fragment {
         context = getActivity().getApplicationContext();
         fm = getFragmentManager();
 
-        // Initialize objects from layout
+        // Get objects from layout
         contactListView = (ListView) view.findViewById(R.id.listViewContacts);
         edtTxtFriend = (EditText) view.findViewById(R.id.editTextFriend);
         btnAddFriend = (Button) view.findViewById(R.id.buttonAddFriend);
 
-        // Retrieve current user from LoginActivity
+        // Get current user from SharedPreferences
         user = SaveSharedPreference.getUserName(context);
-
-        contacts = new String[] {"Loading..."};
 
         // Initialize the Amazon Cognito credentials provider
         CognitoCachingCredentialsProvider credentialsProvider = new CognitoCachingCredentialsProvider(
@@ -94,22 +92,21 @@ public class MenuFragment extends Fragment {
         // Set listener to determine what happens when item in list is clicked
         contactListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                // Get selected user
+                // Get selected user from list view
                 friend = (String) contactListView.getItemAtPosition(position);
 
-                if(!friend.equals("Loading...")) {
-                    // Add friend data to bundle
-                    Bundle b = new Bundle();
-                    b.putString("Friend", friend);
+                // Add friend data to bundle
+                Bundle b = new Bundle();
+                b.putString("Friend", friend);
 
-                    // Load User Fragment
-                    UserFragment userFragment = new UserFragment();
-                    userFragment.setArguments(b); // set bundle
-                    setFragment(userFragment);
-                }
+                // Load User Fragment
+                UserFragment userFragment = new UserFragment();
+                userFragment.setArguments(b); // set bundle
+                setFragment(userFragment);
             }
         });
 
+        // Set listener to determine what happens when item in list is long clicked
         contactListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
@@ -126,12 +123,16 @@ public class MenuFragment extends Fragment {
                         //new AsyncDeleteFriend(context, user, friend).execute();
                         selectedFriend = new Friends();
 
-                        // Delete user/friend record from database
-                        selectedFriend.setUser(user);
-                        selectedFriend.setFriend(friend);
-
                         Runnable runnable = new Runnable() {
                             public void run() {
+                                // Delete user/friend record from database
+                                selectedFriend.setUser(user);
+                                selectedFriend.setFriend(friend);
+                                mapper.delete(selectedFriend);
+
+                                // Delete friend/user record from database
+                                selectedFriend.setUser(friend);
+                                selectedFriend.setFriend(user);
                                 mapper.delete(selectedFriend);
                             }
                         };
@@ -144,29 +145,12 @@ public class MenuFragment extends Fragment {
                             e.printStackTrace();
                         }
 
-                        // Delete friend/user record from database
-                        selectedFriend.setUser(friend);
-                        selectedFriend.setFriend(user);
-
-                        runnable = new Runnable() {
-                            public void run() {
-                                mapper.delete(selectedFriend);
-                            }
-                        };
-                        mythread = new Thread(runnable);
-                        mythread.start();
-                        // Wait for thread to complete
-                        try {
-                            mythread.join();
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-
+                        // Toast user to show successful deletion
                         Toast.makeText(context, "Friend deleted!", Toast.LENGTH_LONG).show();
 
-                        //TODO  refresh friends list
-
-                        contactListView.setVisibility(View.VISIBLE);
+                        // Refresh friends list to remove deleted user
+                        cAdapter.contacts = getUserFriends(user);
+                        cAdapter.notifyDataSetChanged();
 
                         return true;
                     }

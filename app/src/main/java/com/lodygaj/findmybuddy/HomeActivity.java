@@ -29,6 +29,8 @@ import java.net.URLConnection;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import static android.R.attr.id;
+
 public class HomeActivity extends AppCompatActivity {
     private FragmentManager fm;
     private DynamoDBMapper mapper;
@@ -43,7 +45,7 @@ public class HomeActivity extends AppCompatActivity {
         Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
         setSupportActionBar(myToolbar);
 
-        // Set initial fragment
+        // Set initial menu fragment
         fm = getSupportFragmentManager();
         setFragment(new MenuFragment());
 
@@ -70,38 +72,39 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     @Override
+    // Handle action bar item clicks here.
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
         // Get user from shared preferences
         String user = SaveSharedPreference.getUserName(this);
 
-        // use switch to handle selected items
+        // Get id for action bar
+        int id = item.getItemId();
+
+        // Use switch to handle selected items
         switch(id) {
             case R.id.action_my_location:
+                // Show users last known location
                 getUserLocation(user);
                 break;
             case R.id.action_update_location:
-                // Get latitude and longitude from location finder
+                // Get current latitude and longitude
                 LocationFinder locationFinder = new LocationFinder(this);
                 Double latitude = locationFinder.getLatitude();
                 Double longitude = locationFinder.getLongitude();
                 // Get timestamp
                 String timestamp = getTimestamp();
-                // Call async method to update location
+                // Call method to update location
                 setUserLocation(user, latitude, longitude, timestamp);
                 break;
             case R.id.action_logout:
+                // Log out
                 SaveSharedPreference.setUserName(this, "");
+                // Go to login screen
                 Intent mainStartIntent = new Intent(this, MainActivity.class);
                 startActivity(mainStartIntent);
                 this.finish();
                 break;
         }
-
 
         return super.onOptionsItemSelected(item);
     }
@@ -115,7 +118,7 @@ public class HomeActivity extends AppCompatActivity {
         }
     }
 
-    // Method called to get a users location in database
+    // Method called to show users last known location
     public void getUserLocation(final String user) {
         // Get user info from database
         Runnable runnable = new Runnable() {
@@ -132,14 +135,12 @@ public class HomeActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
-         // Add data to bundle
+        // Add user data to bundle
         Bundle b = new Bundle();
         b.putString("Friend", selectedUser.getUsername());
         b.putDouble("Latitude", selectedUser.getLatitude());
         b.putDouble("Longitude", selectedUser.getLongitude());
         b.putString("Time", selectedUser.getTimestamp());
-
-        Toast.makeText(getApplicationContext(), selectedUser.getTimestamp(), Toast.LENGTH_LONG).show();
 
         // Set map fragment
         MapFragment mapFragment = new MapFragment();
@@ -147,7 +148,7 @@ public class HomeActivity extends AppCompatActivity {
         setFragment(mapFragment);
     }
 
-    // Method called to set a users location in database
+    // Method called to update a users location in database
     public void setUserLocation(final String user, final Double latitude, final Double longitude, final String timestamp) {
         // Update user in database
         Runnable runnable = new Runnable() {
@@ -167,9 +168,12 @@ public class HomeActivity extends AppCompatActivity {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+
+        // Toast user that update was successful
         Toast.makeText(getApplicationContext(), "Location updated!", Toast.LENGTH_LONG).show();
     }
 
+    // Method gets a timestamp
     public String getTimestamp() {
         return new SimpleDateFormat("M/d/yy h:mm a").format(new Date());
     }

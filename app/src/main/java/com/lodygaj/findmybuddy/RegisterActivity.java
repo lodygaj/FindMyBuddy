@@ -40,7 +40,7 @@ public class RegisterActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
 
-        // Create objects from layout
+        // Get objects from layout
         firstNameField = (EditText) findViewById(R.id.editTextFirstName);
         lastNameField = (EditText) findViewById(R.id.editTextLastName);
         usernameField = (EditText) findViewById(R.id.editTextUsername);
@@ -48,14 +48,6 @@ public class RegisterActivity extends AppCompatActivity {
         emailConfirmField = (EditText) findViewById(R.id.editTextEmailConfirm);
         passwordField = (EditText) findViewById(R.id.editTextPassword);
         passwordConfirmField = (EditText) findViewById(R.id.editTextPasswordConfirm);
-
-        firstNameField.setText("Joe");
-        lastNameField.setText("Lodyga");
-        usernameField.setText("vigilante276");
-        emailField.setText("lodygaj@hotmail.com");
-        emailConfirmField.setText("lodygaj@hotmail.com");
-        passwordField.setText("vigilante");
-        passwordConfirmField.setText("vigilante");
 
         // Initialize the Amazon Cognito credentials provider
         CognitoCachingCredentialsProvider credentialsProvider = new CognitoCachingCredentialsProvider(
@@ -69,7 +61,6 @@ public class RegisterActivity extends AppCompatActivity {
 
         // Initialize DynamoDB object mapper
         mapper = new DynamoDBMapper(ddbClient);
-
     }
 
     // Method called when "Register" button is clicked
@@ -131,7 +122,7 @@ public class RegisterActivity extends AppCompatActivity {
                             }
                         };
                         mythread = new Thread(runnable);
-                        mythread.start();
+                        mythread.start(); // Start thread
 
                         // Set username in shared preferences
                         SaveSharedPreference.setUserName(getApplicationContext(), username);
@@ -140,6 +131,7 @@ public class RegisterActivity extends AppCompatActivity {
                         Intent homeStartIntent = new Intent(getApplicationContext(), HomeActivity.class);
                         getApplicationContext().startActivity(homeStartIntent);
 
+                        // Toast user to display success message
                         Toast.makeText(getApplicationContext(), "User created!", Toast.LENGTH_LONG).show();
 
                         // Clear fields
@@ -151,21 +143,22 @@ public class RegisterActivity extends AppCompatActivity {
                         firstNameField.setText("");
                         lastNameField.setText("");
                     } else {
+                        // Toast user that username is already taken
                         Toast.makeText(getApplicationContext(), "Username already taken!", Toast.LENGTH_LONG).show();
-                        usernameField.setText("");
+                        usernameField.setText(""); // Clear username field
                     }
                 }
             }
             else {
                 Toast.makeText(getApplicationContext(), "Emails do not match!", Toast.LENGTH_LONG).show();
-                emailField.setText("");
-                emailConfirmField.setText("");
+                emailField.setText(""); // Clear email field
+                emailConfirmField.setText(""); // Clear confirm email field
             }
         }
         else {
             Toast.makeText(getApplicationContext(), "Passwords do not match!", Toast.LENGTH_LONG).show();
-            passwordField.setText("");
-            passwordConfirmField.setText("");
+            passwordField.setText(""); // Clear password field
+            passwordConfirmField.setText(""); // Clear confirm password field
         }
     }
 
