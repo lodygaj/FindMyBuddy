@@ -13,10 +13,21 @@
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:background="?attr/colorPrimary"
+        android:src="@drawable/findmybuddy4"
         android:elevation="4dp"
         app:titleTextColor="#ffffff"
         android:theme="@style/MyToolbarTheme"
-        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:contentDescription="Find My Buddy"
+            android:src="@drawable/findmybuddy4" />
+
+    </android.support.v7.widget.Toolbar>
 
     <FrameLayout
         android:layout_width="match_parent"
