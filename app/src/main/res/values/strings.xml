@@ -14,5 +14,8 @@
     <string name="title_activity_map">Map</string>
 
     <string name="google_android_map_api_key">AIzaSyC6HpovglKsmnD0qyzEUS15AwZf3XMmAMU</string>
+    <string name="title_activity_splash">SplashActivity</string>
+
+    <string name="copyright">Copyright \u00A9 Joe Lodyga 2017</string>
 
 </resources>

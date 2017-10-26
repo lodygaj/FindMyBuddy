@@ -10,6 +10,7 @@ android {
         targetSdkVersion 23
         versionCode 1
         versionName "1.0"
+        multiDexEnabled true
     }
     buildTypes {
         release {
@@ -21,22 +22,25 @@ android {
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
+    compile('com.amazonaws:aws-android-sdk-auth-core:2.6.0@aar') { transitive = true; }
+
+    provided files('libs/amazon-device-messaging-1.0.1.jar')
     compile 'com.android.support:appcompat-v7:23.4.0'
-
     compile 'com.google.android.gms:play-services:10.0.1'
-
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
     compile 'com.android.support:support-v4:23.4.0'
-
-    compile 'com.amazonaws:aws-android-sdk-core:2.2.+'
-    compile 'com.amazonaws:aws-android-sdk-s3:2.2.+'
-    compile 'com.amazonaws:aws-android-sdk-ddb:2.2.+'
-    compile 'com.amazonaws:aws-android-sdk-ddb-mapper:2.2.+'
-    compile 'com.amazonaws:aws-android-sdk-sns:2.2.+'
-    compile 'com.amazonaws:aws-android-sdk-cognitoidentityprovider:2.2.+'
-
+    compile 'com.amazonaws:aws-android-sdk-core:2.6.0'
+    compile 'com.amazonaws:aws-android-sdk-s3:2.6.0'
+    compile 'com.amazonaws:aws-android-sdk-ddb:2.6.0'
+    compile 'com.amazonaws:aws-android-sdk-ddb-mapper:2.6.0'
+    compile 'com.amazonaws:aws-android-sdk-sns:2.6.0'
+    compile 'com.amazonaws:aws-android-sdk-cognitoidentityprovider:2.6.0'
+    compile 'com.android.support:multidex:1.0.1'
+    compile 'com.android.support:design:23.4.0'
     testCompile 'junit:junit:4.12'
 }
+
+
 
 
 
