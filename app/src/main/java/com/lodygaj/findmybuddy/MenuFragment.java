@@ -18,7 +18,7 @@ import android.widget.ListView;
 import android.widget.PopupMenu;
 import android.widget.Toast;
 
-import com.amazonaws.auth.CognitoCachingCredentialsProvider;
+import com.amazonaws.mobile.client.AWSMobileClient;
 import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBMapper;
 import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBQueryExpression;
 import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.PaginatedQueryList;
@@ -66,18 +66,12 @@ public class MenuFragment extends Fragment {
         // Get current user from SharedPreferences
         user = SaveSharedPreference.getUserName(context);
 
-        // Initialize the Amazon Cognito credentials provider
-        CognitoCachingCredentialsProvider credentialsProvider = new CognitoCachingCredentialsProvider(
-                getActivity().getApplicationContext(),
-                "us-east-1:88f63976-d65f-4215-8dae-f887b0421644", // Identity pool ID
-                Regions.US_EAST_1 // Region
-        );
-
         // Initialize Amazon DynamoDB client
-        AmazonDynamoDBClient ddbClient = new AmazonDynamoDBClient(credentialsProvider);
-
-        // Initialize DynamoDB object mapper
-        mapper = new DynamoDBMapper(ddbClient);
+        AmazonDynamoDBClient dynamoDBClient = new AmazonDynamoDBClient(AWSMobileClient.getInstance().getCredentialsProvider());
+        this.mapper = DynamoDBMapper.builder()
+                .dynamoDBClient(dynamoDBClient)
+                .awsConfiguration(AWSMobileClient.getInstance().getConfiguration())
+                .build();
 
         // Create contact list adapter
         cAdapter = new ContactAdapter(context, contacts);
@@ -258,206 +252,4 @@ public class MenuFragment extends Fragment {
         fm.beginTransaction().replace(R.id.fl_content, fragment).addToBackStack(null).commit();
         fm.executePendingTransactions();
     }
-
-//    /**
-//     * Class used for retrieving friends from database and storing them in arraylist
-//     */
-//    public class AsyncGetFriends extends AsyncTask<String, Void, String> {
-//        private Context context;
-//        private String user;
-//        private String parameters;
-//        private final String serverURL = "http://jlodyga.com/server/getFriends.php";
-//
-//        public AsyncGetFriends(Context context, String user) {
-//            this.context = context;
-//            this.user = user;
-//        }
-//
-//        @Override
-//        protected void onPreExecute() {}
-//
-//        @Override
-//        protected String doInBackground(String... arg0) {
-//            //android.os.Debug.waitForDebugger();
-//            parameters = "user=" + user;
-//            try {
-//                URL url = new URL(serverURL);
-//                URLConnection con = url.openConnection();
-//
-//                con.setDoOutput(true);
-//                OutputStreamWriter wr = new OutputStreamWriter(con.getOutputStream());
-//
-//                wr.write(parameters);
-//                wr.flush();
-//                wr.close();
-//
-//                BufferedReader reader = new BufferedReader(new InputStreamReader(con.getInputStream()));
-//                StringBuilder sb = new StringBuilder();
-//                String line = "";
-//
-//                while((line = reader.readLine()) != null) {
-//                    sb.append(line);
-//                    break;
-//                }
-//
-//                String result = sb.toString();
-//                return result;
-//            } catch(Exception e) {
-//                return new String("Exception: " + e.getMessage());
-//            }
-//        }
-//
-//        @Override
-//        public void onPostExecute(String array) {
-//            //android.os.Debug.waitForDebugger();
-//            try {
-//                // Create JSON array from input value
-//                JSONArray jArray = new JSONArray(array);
-//                // Create final array to be returned
-//                String[] friends = new String[jArray.length()];
-//                // Add each object from JSON Array to final array
-//                for (int i = 0; i < jArray.length(); i++) {
-//                    JSONObject object = jArray.getJSONObject(i);
-//                    friends[i] = object.getString(Integer.toString(i));
-//                }
-//
-//                if(friends[0].equals("0")) {
-//                    contactListView.setVisibility(View.GONE);
-//                } else {
-//                    // Set contacts
-//                    cAdapter.contacts = friends;
-//                    cAdapter.notifyDataSetChanged();
-//                }
-//                // Set contacts
-//                cAdapter.contacts = friends;
-//                cAdapter.notifyDataSetChanged();
-//            } catch(Exception e) {
-//                System.out.println("Exception: " + e.getMessage());
-//                cAdapter.contacts[0] = "server error";
-//                cAdapter.notifyDataSetChanged();
-//            }
-//        }
-//    }
-//
-//    /**
-//     * Class used for adding new friends to database
-//     */
-//    public class AsyncAddFriend extends AsyncTask<String, Void, String> {
-//        private String parameters;
-//        private Context context;
-//        private String user, friend;
-//        private final String serverURL = "http://jlodyga.com/server/addFriend.php";
-//
-//        public AsyncAddFriend(Context context, String user, String friend) {
-//            this.context = context;
-//            this.user = user;
-//            this.friend = friend;
-//        }
-//
-//        protected void onPreExecute() {}
-//
-//        @Override
-//        protected String doInBackground(String... arg0) {
-//            //android.os.Debug.waitForDebugger();
-//            parameters = "user=" + user + "&friend=" + friend;
-//            try {
-//                URL url = new URL(serverURL);
-//                URLConnection con = url.openConnection();
-//
-//                con.setDoOutput(true);
-//                OutputStreamWriter wr = new OutputStreamWriter(con.getOutputStream());
-//
-//                wr.write(parameters);
-//                wr.flush();
-//                wr.close();
-//
-//                BufferedReader reader = new BufferedReader(new InputStreamReader(con.getInputStream()));
-//                StringBuilder sb = new StringBuilder();
-//                String line = "";
-//
-//                while((line = reader.readLine()) != null) {
-//                    sb.append(line);
-//                    break;
-//                }
-//
-//                String result = sb.toString();
-//                return result;
-//            } catch(Exception e) {
-//                return new String("Exception: " + e.getMessage());
-//            }
-//        }
-//
-//        public void onPostExecute(String value) {
-//            //android.os.Debug.waitForDebugger();
-//            if(value.equals("2")) {
-//                Toast.makeText(context, "Friend does not exist!", Toast.LENGTH_LONG).show();
-//            } else if(value.equals("1")) {
-//                Toast.makeText(context, "Friend added successfully!", Toast.LENGTH_LONG).show();
-//                new AsyncGetFriends(context, user).execute(); // refresh friends list
-//                contactListView.setVisibility(View.VISIBLE);
-//            } else {
-//                Toast.makeText(context, "Friend already exists!", Toast.LENGTH_LONG).show();
-//            }
-//        }
-//    }
-//
-//    /**
-//     * Class used for deleting friends from database
-//     */
-//    public class AsyncDeleteFriend extends AsyncTask<String, Void, String> {
-//        private String parameters;
-//        private Context context;
-//        private String user, friend;
-//        private final String serverURL = "http://jlodyga.com/server/deleteFriend.php";
-//
-//        public AsyncDeleteFriend(Context context, String user, String friend) {
-//            this.context = context;
-//            this.user = user;
-//            this.friend = friend;
-//        }
-//
-//        protected void onPreExecute() {}
-//
-//        @Override
-//        protected String doInBackground(String... arg0) {
-//            //android.os.Debug.waitForDebugger();
-//            parameters = "user=" + user + "&friend=" + friend;
-//            try {
-//                URL url = new URL(serverURL);
-//                URLConnection con = url.openConnection();
-//
-//                con.setDoOutput(true);
-//                OutputStreamWriter wr = new OutputStreamWriter(con.getOutputStream());
-//
-//                wr.write(parameters);
-//                wr.flush();
-//                wr.close();
-//
-//                BufferedReader reader = new BufferedReader(new InputStreamReader(con.getInputStream()));
-//                StringBuilder sb = new StringBuilder();
-//                String line = "";
-//
-//                while((line = reader.readLine()) != null) {
-//                    sb.append(line);
-//                    break;
-//                }
-//
-//                String result = sb.toString();
-//                return result;
-//            } catch(Exception e) {
-//                return new String("Exception: " + e.getMessage());
-//            }
-//        }
-//
-//        public void onPostExecute(String value) {
-//            //android.os.Debug.waitForDebugger();
-//            if(value.equals("1")) {
-//                Toast.makeText(context, "Friend deleted!", Toast.LENGTH_LONG).show();
-//                new AsyncGetFriends(context, user).execute(); // refresh friends list
-//                contactListView.setVisibility(View.VISIBLE);
-//            } else {
-//                Toast.makeText(context, "Unable to delete!", Toast.LENGTH_LONG).show();
-//            }
-//        }
-//    }
 }

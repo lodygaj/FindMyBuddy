@@ -1,9 +1,6 @@
 package com.lodygaj.findmybuddy;
 
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -11,17 +8,10 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.amazonaws.auth.CognitoCachingCredentialsProvider;
+import com.amazonaws.mobile.client.AWSMobileClient;
 import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBMapper;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
-import com.google.firebase.iid.FirebaseInstanceId;
-import com.google.firebase.messaging.FirebaseMessaging;
-
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.net.URL;
-import java.net.URLConnection;
 
 public class RegisterActivity extends AppCompatActivity {
     private EditText firstNameField;
@@ -49,18 +39,12 @@ public class RegisterActivity extends AppCompatActivity {
         passwordField = (EditText) findViewById(R.id.editTextPassword);
         passwordConfirmField = (EditText) findViewById(R.id.editTextPasswordConfirm);
 
-        // Initialize the Amazon Cognito credentials provider
-        CognitoCachingCredentialsProvider credentialsProvider = new CognitoCachingCredentialsProvider(
-                getApplicationContext(),
-                "us-east-1:88f63976-d65f-4215-8dae-f887b0421644", // Identity pool ID
-                Regions.US_EAST_1 // Region
-        );
-
         // Initialize Amazon DynamoDB client
-        AmazonDynamoDBClient ddbClient = new AmazonDynamoDBClient(credentialsProvider);
-
-        // Initialize DynamoDB object mapper
-        mapper = new DynamoDBMapper(ddbClient);
+        AmazonDynamoDBClient dynamoDBClient = new AmazonDynamoDBClient(AWSMobileClient.getInstance().getCredentialsProvider());
+        this.mapper = DynamoDBMapper.builder()
+                .dynamoDBClient(dynamoDBClient)
+                .awsConfiguration(AWSMobileClient.getInstance().getConfiguration())
+                .build();
     }
 
     // Method called when "Register" button is clicked
@@ -109,7 +93,7 @@ public class RegisterActivity extends AppCompatActivity {
                         user.setUsername(username);
                         user.setPassword(password);
                         user.setEmail(email);
-                        user.setFirstname(firstName);
+                        user.setFirstName(firstName);
                         user.setLastName(lastName);
                         user.setLatitude(0.0);
                         user.setLongitude(0.0);
@@ -177,74 +161,4 @@ public class RegisterActivity extends AppCompatActivity {
         startActivity(mainStartIntent);
         this.finish();
     }
-
-//    /**
-//     * Async class used to register new user in database
-//     */
-//    public class AsyncRegister extends AsyncTask<String, Void, String> {
-//        private String parameters;
-//        private String username;
-//        private Context context;
-//        private String serverURL = "http://jlodyga.com/server/register.php";
-//
-//        public AsyncRegister(Context context) {
-//            this.context = context;
-//        }
-//
-//        protected void onPreExecute() {}
-//
-//        @Override
-//        protected String doInBackground(String... arg0) {
-//            try {
-//                username = (String) arg0[0];
-//                String password = (String) arg0[1];
-//                String email = (String) arg0[2];
-//                String firstName = (String) arg0[3];
-//                String lastName = (String) arg0[4];
-//
-//                parameters = "username=" + username + "&password=" + password + "&email=" + email +
-//                        "&firstName=" + firstName + "&lastName=" + lastName;
-//
-//                URL url = new URL(serverURL);
-//                URLConnection con = url.openConnection();
-//
-//                con.setDoOutput(true);
-//                OutputStreamWriter wr = new OutputStreamWriter(con.getOutputStream());
-//
-//                wr.write(parameters);
-//                wr.flush();
-//                wr.close();
-//
-//                BufferedReader reader = new BufferedReader(new InputStreamReader(con.getInputStream()));
-//                StringBuilder sb = new StringBuilder();
-//                String line = "";
-//
-//                while((line = reader.readLine()) != null) {
-//                    sb.append(line);
-//                    break;
-//                }
-//
-//                String result = sb.toString();
-//                return result;
-//            }
-//            catch(Exception e) {
-//                return new String("Exception: " + e.getMessage());
-//            }
-//        }
-//
-//        public void onPostExecute(String value) {
-//            if (value.equals("1")) {
-//                // Set username in shared preferences
-//                SaveSharedPreference.setUserName(context, username);
-//
-//                // Go to Home Activity
-//                Intent homeStartIntent = new Intent(context, HomeActivity.class);
-//                context.startActivity(homeStartIntent);
-//
-//                Toast.makeText(context, "User successfully created!", Toast.LENGTH_LONG).show();
-//            } else {
-//                Toast.makeText(context, "Username already taken!", Toast.LENGTH_LONG).show();
-//            }
-//        }
-//    }
 }

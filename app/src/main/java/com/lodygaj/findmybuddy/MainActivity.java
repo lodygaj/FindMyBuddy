@@ -1,37 +1,28 @@
 package com.lodygaj.findmybuddy;
 
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.amazonaws.auth.CognitoCachingCredentialsProvider;
+import com.amazonaws.mobile.client.AWSMobileClient;
 import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBMapper;
-import com.amazonaws.regions.Regions;
+import com.amazonaws.mobileconnectors.pinpoint.PinpointConfiguration;
+import com.amazonaws.mobileconnectors.pinpoint.PinpointManager;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.net.URL;
-import java.net.URLConnection;
 
 public class MainActivity extends AppCompatActivity {
     private EditText usernameField;
     private EditText passwordField;
-
-    private DynamoDBMapper mapper;
-
     private User user;
-
     private String username;
     private String password;
+
+    public static PinpointManager pinpointManager;
+    private DynamoDBMapper mapper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,7 +35,32 @@ public class MainActivity extends AppCompatActivity {
 
         // For testing purposes only
         usernameField.setText("vigilante276");
-        passwordField.setText("vigilante");
+        passwordField.setText("vigilante276");
+
+        // Establish connection with AWS Mobile
+        AWSMobileClient.getInstance().initialize(this).execute();
+
+        // Initialize AWS Pinpoint Analytics
+        PinpointConfiguration pinpointConfig = new PinpointConfiguration(
+                getApplicationContext(),
+                AWSMobileClient.getInstance().getCredentialsProvider(),
+                AWSMobileClient.getInstance().getConfiguration());
+
+        pinpointManager = new PinpointManager(pinpointConfig);
+
+        // Start a session with Pinpoint
+        pinpointManager.getSessionClient().startSession();
+
+        // Stop the session and submit the default app started event
+        pinpointManager.getSessionClient().stopSession();
+        pinpointManager.getAnalyticsClient().submitEvents();
+
+        // Initialize Amazon DynamoDB client
+        AmazonDynamoDBClient dynamoDBClient = new AmazonDynamoDBClient(AWSMobileClient.getInstance().getCredentialsProvider());
+        this.mapper = DynamoDBMapper.builder()
+                .dynamoDBClient(dynamoDBClient)
+                .awsConfiguration(AWSMobileClient.getInstance().getConfiguration())
+                .build();
 
         // Check if user is already logged in
         if(SaveSharedPreference.getUserName(MainActivity.this).length() != 0) {
@@ -53,29 +69,11 @@ public class MainActivity extends AppCompatActivity {
             startActivity(homeStartIntent);
             this.finish();
         }
-
-        // Initialize the Amazon Cognito credentials provider
-        CognitoCachingCredentialsProvider credentialsProvider = new CognitoCachingCredentialsProvider(
-                getApplicationContext(),
-                "us-east-1:88f63976-d65f-4215-8dae-f887b0421644", // Identity pool ID
-                Regions.US_EAST_1 // Region
-        );
-
-        // Initialize Amazon DynamoDB client
-        AmazonDynamoDBClient ddbClient = new AmazonDynamoDBClient(credentialsProvider);
-
-        // Initialize DynamoDB object mapper
-        mapper = new DynamoDBMapper(ddbClient);
     }
 
     @Override
     public void onBackPressed() {
         this.finish();
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
     }
 
     // Method called when "Login" button is clicked
@@ -84,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
         username = usernameField.getText().toString();
         password = passwordField.getText().toString();
 
-//        // Check databse to verify that username and password are correct and login
+//        // Check database to verify that username and password are correct and login
 //        new AsyncLogin(this, username, password).execute();
 
         // Retrieve user data from database
@@ -120,67 +118,4 @@ public class MainActivity extends AppCompatActivity {
         startActivity(registerStartIntent);
         this.finish();
     }
-
-//    /**
-//     * Async Class used to verify login credentials from database
-//     */
-//    public class AsyncLogin extends AsyncTask<String, Void, String> {
-//        private String parameters;
-//        private Context context;
-//        private String username, password;
-//        private final String serverURL = "http://jlodyga.com/server/login.php";
-//
-//        public AsyncLogin(Context context, String username, String password) {
-//            this.context = context;
-//            this.username = username;
-//            this.password = password;
-//        }
-//
-//        protected void onPreExecute() {}
-//
-//        @Override
-//        protected String doInBackground(String... arg0) {
-//            parameters = "username=" + username + "&password=" + password;
-//            try {
-//                URL url = new URL(serverURL);
-//                URLConnection con = url.openConnection();
-//
-//                con.setDoOutput(true);
-//                OutputStreamWriter wr = new OutputStreamWriter(con.getOutputStream());
-//
-//                wr.write(parameters);
-//                wr.flush();
-//                wr.close();
-//
-//                BufferedReader reader = new BufferedReader(new InputStreamReader(con.getInputStream()));
-//                StringBuilder sb = new StringBuilder();
-//                String line = "";
-//
-//                while((line = reader.readLine()) != null) {
-//                    sb.append(line);
-//                    break;
-//                }
-//
-//                String result = sb.toString();
-//                return result;
-//            }
-//            catch(Exception e) {
-//                return new String("Exception: " + e.getMessage());
-//            }
-//        }
-//
-//        public void onPostExecute(String value) {
-//            if (value.equals("1")) {
-//                // Set username in shared preferences
-//                SaveSharedPreference.setUserName(context, username);
-//                // Start menu activity
-//                Intent homeStartIntent = new Intent(context, HomeActivity.class);
-//                context.startActivity(homeStartIntent);
-//            } else if (value.equals("0")) {
-//                Toast.makeText(context, "Wrong username or Password!", Toast.LENGTH_LONG).show();
-//            } else {
-//                Toast.makeText(context, "Cannot connect to server!", Toast.LENGTH_LONG).show();
-//            }
-//        }
-//    }
 }

@@ -1,91 +1,94 @@
 package com.lodygaj.findmybuddy;
 
-import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.*;
+import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBAttribute;
+import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBHashKey;
+import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBIndexHashKey;
+import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBIndexRangeKey;
+import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBRangeKey;
+import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBTable;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by Joey Laptop on 8/12/2017.
  */
+@DynamoDBTable(tableName = "findmybuddy-mobilehub-1813168738-users")
 
-@DynamoDBTable(tableName = "users")
 public class User {
-    private String username;
-    private String password;
-    private String firstname;
-    private String lastName;
-    private String email;
-    private double latitude;
-    private double longitude;
-    private String timestamp;
+    private String _username;
+    private String _email;
+    private String _firstName;
+    private String _lastName;
+    private double _latitude;
+    private double _longitude;
+    private String _password;
+    private String _timestamp;
 
     @DynamoDBHashKey(attributeName = "username")
+    @DynamoDBAttribute(attributeName = "username")
     public String getUsername() {
-        return username;
+        return _username;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setUsername(final String _username) {
+        this._username = _username;
     }
-
-    @DynamoDBAttribute(attributeName = "password")
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    @DynamoDBAttribute(attributeName = "firstName")
-    public String getFirstname() {
-        return firstname;
-    }
-
-    public void setFirstname(String firstname) {
-        this.firstname = firstname;
-    }
-
-    @DynamoDBAttribute(attributeName = "lastName")
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
     @DynamoDBAttribute(attributeName = "email")
     public String getEmail() {
-        return email;
+        return _email;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    public void setEmail(final String _email) {
+        this._email = _email;
+    }
+    @DynamoDBAttribute(attributeName = "firstName")
+    public String getFirstName() {
+        return _firstName;
     }
 
+    public void setFirstName(final String _firstName) {
+        this._firstName = _firstName;
+    }
+    @DynamoDBAttribute(attributeName = "lastName")
+    public String getLastName() {
+        return _lastName;
+    }
+
+    public void setLastName(final String _lastName) {
+        this._lastName = _lastName;
+    }
     @DynamoDBAttribute(attributeName = "latitude")
     public double getLatitude() {
-        return latitude;
+        return _latitude;
     }
 
-    public void setLatitude(double latitude) {
-        this.latitude = latitude;
+    public void setLatitude(final double _latitude) {
+        this._latitude = _latitude;
     }
-
     @DynamoDBAttribute(attributeName = "longitude")
     public double getLongitude() {
-        return longitude;
+        return _longitude;
     }
 
-    public void setLongitude(double longitude) {
-        this.longitude = longitude;
+    public void setLongitude(final double _longitude) {
+        this._longitude = _longitude;
+    }
+    @DynamoDBAttribute(attributeName = "password")
+    public String getPassword() {
+        return _password;
     }
 
+    public void setPassword(final String _password) {
+        this._password = _password;
+    }
     @DynamoDBAttribute(attributeName = "timestamp")
     public String getTimestamp() {
-        return timestamp;
+        return _timestamp;
     }
 
-    public void setTimestamp(String timestamp) {
-        this.timestamp = timestamp;
+    public void setTimestamp(final String _timestamp) {
+        this._timestamp = _timestamp;
     }
 }

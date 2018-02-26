@@ -6,8 +6,8 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.widget.Toast;
 
 /**
  * Created by Joey Laptop on 6/8/2016.
@@ -62,6 +62,7 @@ public class LocationFinder implements LocationListener {
                     }
                 }
             } else {
+                Toast.makeText(context, "NO GPS OR NETWORK", Toast.LENGTH_SHORT).show();
                 // GPS AND NETWORK NOT AVAILABLE
             }
         }

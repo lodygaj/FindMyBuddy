@@ -7,7 +7,6 @@ import android.preference.PreferenceManager;
 /**
  * Created by Joey Laptop on 6/29/2017.
  */
-
 public class SaveSharedPreference {
     static final String PREF_USER_NAME= "username";
 

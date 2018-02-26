@@ -9,8 +9,6 @@ import android.widget.Button;
 /**
  * Created by Joey Laptop on 6/29/2017.
  */
-
-
 public class UpdateAlertDialog extends Activity implements
         android.view.View.OnClickListener {
 

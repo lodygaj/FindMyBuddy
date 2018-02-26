@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 23
-    buildToolsVersion '25.0.0'
+    buildToolsVersion '26.0.2'
 
     defaultConfig {
         applicationId "com.lodygaj.findmybuddy"
@@ -22,27 +22,23 @@ android {
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile('com.amazonaws:aws-android-sdk-auth-core:2.6.0@aar') { transitive = true; }
+    compile ('com.amazonaws:aws-android-sdk-mobile-client:2.6.7@aar') { transitive = true }
+    compile 'com.amazonaws:aws-android-sdk-pinpoint:2.6.+'
 
-    provided files('libs/amazon-device-messaging-1.0.1.jar')
+    compile 'com.amazonaws:aws-android-sdk-core:2.6.+'
+    compile 'com.amazonaws:aws-android-sdk-ddb-mapper:2.6.+'
+
     compile 'com.android.support:appcompat-v7:23.4.0'
-    compile 'com.google.android.gms:play-services:10.0.1'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
     compile 'com.android.support:support-v4:23.4.0'
-    compile 'com.amazonaws:aws-android-sdk-core:2.6.0'
-    compile 'com.amazonaws:aws-android-sdk-s3:2.6.0'
-    compile 'com.amazonaws:aws-android-sdk-ddb:2.6.0'
-    compile 'com.amazonaws:aws-android-sdk-ddb-mapper:2.6.0'
-    compile 'com.amazonaws:aws-android-sdk-sns:2.6.0'
-    compile 'com.amazonaws:aws-android-sdk-cognitoidentityprovider:2.6.0'
-    compile 'com.android.support:multidex:1.0.1'
+    compile 'com.android.support:multidex:1.0.+'
     compile 'com.android.support:design:23.4.0'
+
+    compile 'com.google.android.gms:play-services-maps:11.8.0'
+    compile 'com.google.android.gms:play-services-gcm:11.8.0'
+    compile 'com.google.android.gms:play-services-location:11.8.0'
+
     testCompile 'junit:junit:4.12'
 }
-
-
-
-
-
 
 apply plugin: 'com.google.gms.google-services'
