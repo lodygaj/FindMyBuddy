@@ -7,7 +7,7 @@ android {
     defaultConfig {
         applicationId "com.lodygaj.findmybuddy"
         minSdkVersion 21
-        targetSdkVersion 23
+        targetSdkVersion 21
         versionCode 1
         versionName "1.0"
         multiDexEnabled true
@@ -23,6 +23,7 @@ android {
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     compile ('com.amazonaws:aws-android-sdk-mobile-client:2.6.7@aar') { transitive = true }
+    compile ('com.amazonaws:aws-android-sdk-auth-core:2.6.+@aar')  { transitive = true }
     compile 'com.amazonaws:aws-android-sdk-pinpoint:2.6.+'
 
     compile 'com.amazonaws:aws-android-sdk-core:2.6.+'
@@ -37,6 +38,9 @@ dependencies {
     compile 'com.google.android.gms:play-services-maps:11.8.0'
     compile 'com.google.android.gms:play-services-gcm:11.8.0'
     compile 'com.google.android.gms:play-services-location:11.8.0'
+
+    compile 'com.google.firebase:firebase-core:11.8.0'
+    compile 'com.google.firebase:firebase-messaging:11.8.0'
 
     testCompile 'junit:junit:4.12'
 }
