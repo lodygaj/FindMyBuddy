@@ -12,6 +12,7 @@ import com.amazonaws.mobile.client.AWSMobileClient;
 import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBMapper;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
+import com.google.firebase.iid.FirebaseInstanceId;
 
 public class RegisterActivity extends AppCompatActivity {
     private EditText firstNameField;
@@ -111,6 +112,9 @@ public class RegisterActivity extends AppCompatActivity {
                         // Set username in shared preferences
                         SaveSharedPreference.setUserName(getApplicationContext(), username);
 
+                        // Update fcm token in DynamoDb users table
+                        updateFcmToken(FirebaseInstanceId.getInstance().getToken(), username);
+
                         // Go to Home Activity
                         Intent homeStartIntent = new Intent(getApplicationContext(), HomeActivity.class);
                         getApplicationContext().startActivity(homeStartIntent);
@@ -160,5 +164,24 @@ public class RegisterActivity extends AppCompatActivity {
         Intent mainStartIntent = new Intent(getApplicationContext(), MainActivity.class);
         startActivity(mainStartIntent);
         this.finish();
+    }
+
+    public void updateFcmToken(final String token, final String username) {
+        // Update user in database
+        Runnable runnable = new Runnable() {
+            public void run() {
+                User currentUser = mapper.load(User.class, username);
+                currentUser.setFcmToken(token);
+                mapper.save(currentUser);
+            }
+        };
+        Thread mythread = new Thread(runnable);
+        mythread.start();
+        // Wait for thread to complete
+        try {
+            mythread.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }

@@ -25,6 +25,7 @@ public class User {
     private double _longitude;
     private String _password;
     private String _timestamp;
+    private String _fcmToken;
 
     @DynamoDBHashKey(attributeName = "username")
     @DynamoDBAttribute(attributeName = "username")
@@ -35,6 +36,7 @@ public class User {
     public void setUsername(final String _username) {
         this._username = _username;
     }
+
     @DynamoDBAttribute(attributeName = "email")
     public String getEmail() {
         return _email;
@@ -43,6 +45,7 @@ public class User {
     public void setEmail(final String _email) {
         this._email = _email;
     }
+
     @DynamoDBAttribute(attributeName = "firstName")
     public String getFirstName() {
         return _firstName;
@@ -51,6 +54,7 @@ public class User {
     public void setFirstName(final String _firstName) {
         this._firstName = _firstName;
     }
+
     @DynamoDBAttribute(attributeName = "lastName")
     public String getLastName() {
         return _lastName;
@@ -59,6 +63,7 @@ public class User {
     public void setLastName(final String _lastName) {
         this._lastName = _lastName;
     }
+
     @DynamoDBAttribute(attributeName = "latitude")
     public double getLatitude() {
         return _latitude;
@@ -67,6 +72,7 @@ public class User {
     public void setLatitude(final double _latitude) {
         this._latitude = _latitude;
     }
+
     @DynamoDBAttribute(attributeName = "longitude")
     public double getLongitude() {
         return _longitude;
@@ -75,6 +81,7 @@ public class User {
     public void setLongitude(final double _longitude) {
         this._longitude = _longitude;
     }
+
     @DynamoDBAttribute(attributeName = "password")
     public String getPassword() {
         return _password;
@@ -83,6 +90,7 @@ public class User {
     public void setPassword(final String _password) {
         this._password = _password;
     }
+
     @DynamoDBAttribute(attributeName = "timestamp")
     public String getTimestamp() {
         return _timestamp;
@@ -90,5 +98,14 @@ public class User {
 
     public void setTimestamp(final String _timestamp) {
         this._timestamp = _timestamp;
+    }
+
+    @DynamoDBAttribute(attributeName = "fcmToken")
+    public String getFcmToken() {
+        return _fcmToken;
+    }
+
+    public void setFcmToken(final String _fcmToken) {
+        this._fcmToken = _fcmToken;
     }
 }

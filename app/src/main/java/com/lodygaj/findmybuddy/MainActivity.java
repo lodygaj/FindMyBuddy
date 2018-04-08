@@ -9,9 +9,8 @@ import android.widget.Toast;
 
 import com.amazonaws.mobile.client.AWSMobileClient;
 import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBMapper;
-import com.amazonaws.mobileconnectors.pinpoint.PinpointConfiguration;
-import com.amazonaws.mobileconnectors.pinpoint.PinpointManager;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
+import com.google.firebase.iid.FirebaseInstanceId;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -21,7 +20,6 @@ public class MainActivity extends AppCompatActivity {
     private String username;
     private String password;
 
-    public static PinpointManager pinpointManager;
     private DynamoDBMapper mapper;
 
     @Override
@@ -36,24 +34,6 @@ public class MainActivity extends AppCompatActivity {
         // For testing purposes only
         usernameField.setText("vigilante276");
         passwordField.setText("vigilante276");
-
-        // Establish connection with AWS Mobile
-        AWSMobileClient.getInstance().initialize(this).execute();
-
-        // Initialize AWS Pinpoint Analytics
-        PinpointConfiguration pinpointConfig = new PinpointConfiguration(
-                getApplicationContext(),
-                AWSMobileClient.getInstance().getCredentialsProvider(),
-                AWSMobileClient.getInstance().getConfiguration());
-
-        pinpointManager = new PinpointManager(pinpointConfig);
-
-        // Start a session with Pinpoint
-        pinpointManager.getSessionClient().startSession();
-
-        // Stop the session and submit the default app started event
-        pinpointManager.getSessionClient().stopSession();
-        pinpointManager.getAnalyticsClient().submitEvents();
 
         // Initialize Amazon DynamoDB client
         AmazonDynamoDBClient dynamoDBClient = new AmazonDynamoDBClient(AWSMobileClient.getInstance().getCredentialsProvider());
@@ -78,12 +58,9 @@ public class MainActivity extends AppCompatActivity {
 
     // Method called when "Login" button is clicked
     public void login(View view) {
-        // Get username and pasword from fields
+        // Get username and password from fields
         username = usernameField.getText().toString();
         password = passwordField.getText().toString();
-
-//        // Check database to verify that username and password are correct and login
-//        new AsyncLogin(this, username, password).execute();
 
         // Retrieve user data from database
         Runnable runnable = new Runnable() {
@@ -104,6 +81,10 @@ public class MainActivity extends AppCompatActivity {
         if(user != null && user.getPassword().equals(password)) {
             // Set username in shared preferences
             SaveSharedPreference.setUserName(getApplicationContext(), username);
+
+            // Update fcm token to AWS DynamoDb users table
+            updateFcmToken(FirebaseInstanceId.getInstance().getToken());
+
             // Start menu activity
             Intent homeStartIntent = new Intent(getApplicationContext(), HomeActivity.class);
             getApplicationContext().startActivity(homeStartIntent);
@@ -117,5 +98,24 @@ public class MainActivity extends AppCompatActivity {
         Intent registerStartIntent = new Intent(getApplicationContext(), RegisterActivity.class);
         startActivity(registerStartIntent);
         this.finish();
+    }
+
+    public void updateFcmToken(final String token) {
+        // Update user in database
+        Runnable runnable = new Runnable() {
+            public void run() {
+                User currentUser = mapper.load(User.class, username);
+                currentUser.setFcmToken(token);
+                mapper.save(currentUser);
+            }
+        };
+        Thread mythread = new Thread(runnable);
+        mythread.start();
+        // Wait for thread to complete
+        try {
+            mythread.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }
