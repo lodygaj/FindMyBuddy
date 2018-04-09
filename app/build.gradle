@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 23
-    buildToolsVersion '26.0.2'
+    buildToolsVersion '27.0.3'
 
     defaultConfig {
         applicationId "com.lodygaj.findmybuddy"
@@ -41,6 +41,8 @@ dependencies {
 
     implementation 'com.google.firebase:firebase-core:11.8.0'
     implementation 'com.google.firebase:firebase-messaging:11.8.0'
+
+    implementation 'com.scaledrone:scaledrone-java:0.3.0'
 
     testImplementation 'junit:junit:4.12'
 }
