@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -37,6 +38,7 @@ public class UserFragment extends Fragment implements RoomListener {
     private Context context;
     private FragmentManager fm;
     private Button btnLastKnown, btnSendRequest;
+    private ImageButton btnSendmessage;
     private EditText chatEdtTxt;
     private String user, friend;
     private TextView txtUser;
@@ -61,8 +63,16 @@ public class UserFragment extends Fragment implements RoomListener {
         txtUser = (TextView) view.findViewById(R.id.txtUsername);
         chatView = (ListView) view.findViewById(R.id.chat_view);
         chatEdtTxt = (EditText) view.findViewById(R.id.chatEdtTxt);
+        btnSendmessage = (ImageButton) view.findViewById(R.id.btnSendMessage);
         btnLastKnown = (Button) view.findViewById(R.id.btnLastKnown);
         btnSendRequest = (Button) view.findViewById(R.id.btnLocRequest);
+
+        // Initialize Amazon DynamoDB client
+        AmazonDynamoDBClient dynamoDBClient = new AmazonDynamoDBClient(AWSMobileClient.getInstance().getCredentialsProvider());
+        this.mapper = DynamoDBMapper.builder()
+                .dynamoDBClient(dynamoDBClient)
+                .awsConfiguration(AWSMobileClient.getInstance().getConfiguration())
+                .build();
 
         // Get current user from shared preferences
         user = SaveSharedPreference.getUserName(context);
@@ -80,13 +90,15 @@ public class UserFragment extends Fragment implements RoomListener {
         messageAdapter = new MessageAdapter(context);
         chatView.setAdapter(messageAdapter);
 
-        // Create user data for chat
+        // Create user data for Scaledrone chat
         MemberData data = new MemberData(user, getRandomColor());
 
-        // Create room name for chat
+        //TODO
+        // Create room name for Scaledrone chat
         //roomName = "observable-" + user + "_" + friend;
         roomName = "observable-room";
 
+        // Initialize Scaledrone chat
         scaledrone = new Scaledrone(channelID, data);
         scaledrone.connect(new Listener() {
             @Override
@@ -111,12 +123,17 @@ public class UserFragment extends Fragment implements RoomListener {
             }
         });
 
-        // Initialize Amazon DynamoDB client
-        AmazonDynamoDBClient dynamoDBClient = new AmazonDynamoDBClient(AWSMobileClient.getInstance().getCredentialsProvider());
-        this.mapper = DynamoDBMapper.builder()
-                .dynamoDBClient(dynamoDBClient)
-                .awsConfiguration(AWSMobileClient.getInstance().getConfiguration())
-                .build();
+        // Called when send message button is clicked
+        btnSendmessage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String message = chatEdtTxt.getText().toString();
+                if (message.length() > 0) {
+                    scaledrone.publish(roomName, message);
+                    chatEdtTxt.getText().clear();
+                }
+            }
+        });
 
         // Called when add friend button is clicked
         btnLastKnown.setOnClickListener(new View.OnClickListener() {
@@ -157,6 +174,8 @@ public class UserFragment extends Fragment implements RoomListener {
         btnSendRequest.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                //TODO
+
 
             }
         });
@@ -211,35 +230,35 @@ public class UserFragment extends Fragment implements RoomListener {
         }
         return sb.toString().substring(0, 7);
     }
+}
 
-    // Class structure used to hold user data for Scaledrone chat API
-    class MemberData {
-        private String name;
-        private String color;
+// Class structure used to hold user data for Scaledrone chat API
+class MemberData {
+    private String name;
+    private String color;
 
-        public MemberData(String name, String color) {
-            this.name = name;
-            this.color = color;
-        }
+    public MemberData(String name, String color) {
+        this.name = name;
+        this.color = color;
+    }
 
-        // Add an empty constructor so we can later parse JSON into MemberData using Jackson
-        public MemberData() {
-        }
+    // Add an empty constructor so we can later parse JSON into MemberData using Jackson
+    public MemberData() {
+    }
 
-        public String getName() {
-            return name;
-        }
+    public String getName() {
+        return name;
+    }
 
-        public String getColor() {
-            return color;
-        }
+    public String getColor() {
+        return color;
+    }
 
-        @Override
-        public String toString() {
-            return "MemberData{" +
-                    "name='" + name + '\'' +
-                    ", color='" + color + '\'' +
-                    '}';
-        }
+    @Override
+    public String toString() {
+        return "MemberData{" +
+                "name='" + name + '\'' +
+                ", color='" + color + '\'' +
+                '}';
     }
 }

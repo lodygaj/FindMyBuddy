@@ -1,7 +1,5 @@
 package com.lodygaj.findmybuddy;
 
-import com.lodygaj.findmybuddy.UserFragment.MemberData;
-
 public class Message {
     private String text;
     private MemberData data;
