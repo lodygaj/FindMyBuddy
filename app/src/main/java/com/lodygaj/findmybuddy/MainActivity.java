@@ -10,7 +10,6 @@ import android.widget.Toast;
 import com.amazonaws.mobile.client.AWSMobileClient;
 import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
-import com.google.firebase.iid.FirebaseInstanceId;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -68,11 +67,11 @@ public class MainActivity extends AppCompatActivity {
                 user = mapper.load(User.class, username);
             }
         };
-        Thread mythread = new Thread(runnable);
-        mythread.start();
+        Thread myThread = new Thread(runnable);
+        myThread.start();
         // Wait for thread to complete
         try {
-            mythread.join();
+            myThread.join();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -81,9 +80,6 @@ public class MainActivity extends AppCompatActivity {
         if(user != null && user.getPassword().equals(password)) {
             // Set username in shared preferences
             SaveSharedPreference.setUserName(getApplicationContext(), username);
-
-            // Update fcm token to AWS DynamoDb users table
-            updateFcmToken(FirebaseInstanceId.getInstance().getToken());
 
             // Start menu activity
             Intent homeStartIntent = new Intent(getApplicationContext(), HomeActivity.class);
@@ -98,24 +94,5 @@ public class MainActivity extends AppCompatActivity {
         Intent registerStartIntent = new Intent(getApplicationContext(), RegisterActivity.class);
         startActivity(registerStartIntent);
         this.finish();
-    }
-
-    public void updateFcmToken(final String token) {
-        // Update user in database
-        Runnable runnable = new Runnable() {
-            public void run() {
-                User currentUser = mapper.load(User.class, username);
-                currentUser.setFcmToken(token);
-                mapper.save(currentUser);
-            }
-        };
-        Thread mythread = new Thread(runnable);
-        mythread.start();
-        // Wait for thread to complete
-        try {
-            mythread.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
     }
 }

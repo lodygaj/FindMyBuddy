@@ -12,11 +12,19 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.amazonaws.mobile.client.AWSMobileClient;
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
+import com.amazonaws.services.dynamodbv2.model.AttributeValue;
+import com.amazonaws.services.dynamodbv2.model.GetItemRequest;
+import com.amazonaws.mobileconnectors.dynamodbv2.document.Table;
 import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBMapper;
+import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBQueryExpression;
+import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.PaginatedQueryList;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 
+import com.amazonaws.services.dynamodbv2.model.GetItemResult;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -27,6 +35,12 @@ import com.scaledrone.lib.Room;
 import com.scaledrone.lib.RoomListener;
 import com.scaledrone.lib.Scaledrone;
 
+import org.w3c.dom.Attr;
+
+import java.util.AbstractMap;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 import static com.amazonaws.mobile.auth.core.internal.util.ThreadUtils.runOnUiThread;
@@ -42,11 +56,15 @@ public class UserFragment extends Fragment implements RoomListener {
     private EditText chatEdtTxt;
     private String user, friend;
     private TextView txtUser;
-    private DynamoDBMapper mapper;
+
     private User selectedUser;
 
-    private MessageAdapter messageAdapter;
+    private AmazonDynamoDBClient dynamoDBClient;
+    private DynamoDBMapper mapper;
+    private PaginatedQueryList<Message> result;
+
     private ListView chatView;
+    private MessageAdapter messageAdapter;
 
     private String channelID = "RAr1NhVD6XnYNC95";
     private String roomName;
@@ -68,7 +86,7 @@ public class UserFragment extends Fragment implements RoomListener {
         btnSendRequest = (Button) view.findViewById(R.id.btnLocRequest);
 
         // Initialize Amazon DynamoDB client
-        AmazonDynamoDBClient dynamoDBClient = new AmazonDynamoDBClient(AWSMobileClient.getInstance().getCredentialsProvider());
+        dynamoDBClient = new AmazonDynamoDBClient(AWSMobileClient.getInstance().getCredentialsProvider());
         this.mapper = DynamoDBMapper.builder()
                 .dynamoDBClient(dynamoDBClient)
                 .awsConfiguration(AWSMobileClient.getInstance().getConfiguration())
@@ -90,13 +108,14 @@ public class UserFragment extends Fragment implements RoomListener {
         messageAdapter = new MessageAdapter(context);
         chatView.setAdapter(messageAdapter);
 
+        // Create room name for Scaledrone chat
+        getRoomName();
+
+        // Populate chat list view from DynamoDB message table
+        getMessages();
+
         // Create user data for Scaledrone chat
         MemberData data = new MemberData(user, getRandomColor());
-
-        //TODO
-        // Create room name for Scaledrone chat
-        //roomName = "observable-" + user + "_" + friend;
-        roomName = "observable-room";
 
         // Initialize Scaledrone chat
         scaledrone = new Scaledrone(channelID, data);
@@ -132,6 +151,16 @@ public class UserFragment extends Fragment implements RoomListener {
                     scaledrone.publish(roomName, message);
                     chatEdtTxt.getText().clear();
                 }
+
+                // Submit message to DynamoDB database
+                final Message newMessage = new Message(user, friend, message, getTimestamp());
+                Runnable runnable = new Runnable() {
+                    public void run() {
+                        mapper.save(newMessage);
+                    }
+                };
+                Thread myThread = new Thread(runnable);
+                myThread.start();
             }
         });
 
@@ -177,10 +206,73 @@ public class UserFragment extends Fragment implements RoomListener {
                 //TODO
 
 
+
+
             }
         });
 
         return view;
+    }
+
+    // Retrieves chat messages from DynamoDb and populates list view
+    public void getMessages() {
+        Message message = new Message();
+        message.setUser(user);
+
+        Map<String, AttributeValue> attributeValues = new HashMap<>();
+        attributeValues.put(":friend", new AttributeValue(friend));
+
+        // Build message query
+        final DynamoDBQueryExpression<Message> queryExpression = new DynamoDBQueryExpression<Message>()
+                .withHashKeyValues(message)
+                .withFilterExpression("friend = :friend")
+                .withExpressionAttributeValues(attributeValues);
+
+        // Query messages from database
+        Runnable runnable = new Runnable() {
+            public void run() {
+                Boolean belongsToCurrentUser;
+                final MemberData data = new MemberData(user, getRandomColor());
+                List<Message> messageList = mapper.query(Message.class, queryExpression);
+
+                for(Message m: messageList) {
+                    if(m.getUser().equals(user)) {
+                        belongsToCurrentUser = true;
+                    } else {
+                        belongsToCurrentUser = false;
+                    }
+
+                    final MessageData message = new MessageData(m.getText(), data, belongsToCurrentUser);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            messageAdapter.add(message);
+                            chatView.setSelection(chatView.getCount() - 1);
+                        }
+                    });
+                }
+            }
+        };
+        Thread myThread = new Thread(runnable);
+        myThread.start();
+        // Wait for thread to complete
+        try {
+            myThread.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Get current timestamp
+    public String getTimestamp() {
+        Long tsLong = System.currentTimeMillis() / 1000;
+        return tsLong.toString();
+    }
+
+    // Method called to upgrade fragment
+    public void setFragment(Fragment fragment) {
+        fm.beginTransaction().replace(R.id.fl_content, fragment).addToBackStack(null).commit();
+        fm.executePendingTransactions();
     }
 
     // Successfully connected to Scaledrone room
@@ -202,7 +294,7 @@ public class UserFragment extends Fragment implements RoomListener {
         try {
             final MemberData data = mapper.treeToValue(member.getClientData(), MemberData.class);
             boolean belongsToCurrentUser = member.getId().equals(scaledrone.getClientID());
-            final Message message = new Message(json.asText(), data, belongsToCurrentUser);
+            final MessageData message = new MessageData(json.asText(), data, belongsToCurrentUser);
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -215,12 +307,6 @@ public class UserFragment extends Fragment implements RoomListener {
         }
     }
 
-    // Method called to upgrade fragment
-    public void setFragment(Fragment fragment) {
-        fm.beginTransaction().replace(R.id.fl_content, fragment).addToBackStack(null).commit();
-        fm.executePendingTransactions();
-    }
-
     // Function used to return a random hex color value
     private String getRandomColor() {
         Random r = new Random();
@@ -229,6 +315,29 @@ public class UserFragment extends Fragment implements RoomListener {
             sb.append(Integer.toHexString(r.nextInt()));
         }
         return sb.toString().substring(0, 7);
+    }
+
+    // Create unique ScaleDrone chat room name for user and friend
+    public void getRoomName() {
+        // Get room info from database
+        Runnable runnable = new Runnable() {
+            public void run() {
+                Friends friendToFind = mapper.load(Friends.class, user, friend);
+                if(friendToFind.getAdded()) {
+                    roomName = "observable-" + user + friend;
+                } else {
+                    roomName = "observable-" + friend + user;
+                }
+            }
+        };
+        Thread myThread = new Thread(runnable);
+        myThread.start();
+        // Wait for thread to complete
+        try {
+            myThread.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }
 

@@ -25,9 +25,10 @@ dependencies {
     implementation ('com.amazonaws:aws-android-sdk-mobile-client:2.6.7@aar') { transitive = true }
     implementation ('com.amazonaws:aws-android-sdk-auth-core:2.6.+@aar')  { transitive = true }
     implementation 'com.amazonaws:aws-android-sdk-pinpoint:2.6.+'
-
     implementation 'com.amazonaws:aws-android-sdk-core:2.6.+'
     implementation 'com.amazonaws:aws-android-sdk-ddb-mapper:2.6.+'
+    implementation 'com.amazonaws:aws-android-sdk-ddb:2.6.+'
+    implementation 'com.amazonaws:aws-android-sdk-ddb-document:2.6.+'
 
     implementation 'com.android.support:appcompat-v7:23.4.0'
     implementation 'com.android.support.constraint:constraint-layout:1.0.2'

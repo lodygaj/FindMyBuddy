@@ -19,5 +19,7 @@
 
     <string name="google_android_map_api_key">AIzaSyC6HpovglKsmnD0qyzEUS15AwZf3XMmAMU</string>
     <string name="title_activity_splash">SplashActivity</string>
+    <string name="appwidget_text">EXAMPLE</string>
+    <string name="add_widget">Add widget</string>
 
 </resources>

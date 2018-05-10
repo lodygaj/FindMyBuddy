@@ -16,6 +16,7 @@ import java.util.Set;
 public class Friends {
     private String _user;
     private String _friend;
+    private Boolean _added;
 
     @DynamoDBHashKey(attributeName = "user")
     @DynamoDBAttribute(attributeName = "user")
@@ -26,6 +27,7 @@ public class Friends {
     public void setUser(final String _user) {
         this._user = _user;
     }
+
     @DynamoDBRangeKey(attributeName = "friend")
     @DynamoDBAttribute(attributeName = "friend")
     public String getFriend() {
@@ -34,5 +36,14 @@ public class Friends {
 
     public void setFriend(final String _friend) {
         this._friend = _friend;
+    }
+
+    @DynamoDBAttribute(attributeName = "added")
+    public Boolean getAdded() {
+        return _added;
+    }
+
+    public void setAdded(Boolean _added) {
+        this._added = _added;
     }
 }

@@ -25,7 +25,6 @@ public class User {
     private double _longitude;
     private String _password;
     private String _timestamp;
-    private String _fcmToken;
 
     @DynamoDBHashKey(attributeName = "username")
     @DynamoDBAttribute(attributeName = "username")
@@ -98,14 +97,5 @@ public class User {
 
     public void setTimestamp(final String _timestamp) {
         this._timestamp = _timestamp;
-    }
-
-    @DynamoDBAttribute(attributeName = "fcmToken")
-    public String getFcmToken() {
-        return _fcmToken;
-    }
-
-    public void setFcmToken(final String _fcmToken) {
-        this._fcmToken = _fcmToken;
     }
 }

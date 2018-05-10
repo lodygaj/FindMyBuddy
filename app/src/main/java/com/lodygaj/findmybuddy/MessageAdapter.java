@@ -12,16 +12,17 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class MessageAdapter extends BaseAdapter {
-    List<Message> messages = new ArrayList<Message>();
+    List<MessageData> messages = new ArrayList<>();
     Context context;
 
     public MessageAdapter(Context context) {
         this.context = context;
     }
 
-    public void add(Message message) {
+    public void add(MessageData message) {
         this.messages.add(message);
         notifyDataSetChanged();
     }
@@ -45,7 +46,7 @@ public class MessageAdapter extends BaseAdapter {
     public View getView(int i, View convertView, ViewGroup viewGroup) {
         MessageViewHolder holder = new MessageViewHolder();
         LayoutInflater messageInflater = (LayoutInflater) context.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
-        Message message = messages.get(i);
+        MessageData message = messages.get(i);
 
         if (message.isBelongsToCurrentUser()) {
             convertView = messageInflater.inflate(R.layout.my_message_bubble, null);

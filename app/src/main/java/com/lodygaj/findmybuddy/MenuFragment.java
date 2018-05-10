@@ -215,25 +215,27 @@ public class MenuFragment extends Fragment {
     }
 
     public void addFriend(final String friend) {
-        // Add friend to database
+        // Add friendship to database
         Runnable runnable = new Runnable() {
             public void run() {
                 Friends friends = new Friends();
                 // Add user/friend item
                 friends.setUser(user);
                 friends.setFriend(friend);
+                friends.setAdded(true);
                 mapper.save(friends);
                 // Add friend/user item
                 friends.setUser(friend);
                 friends.setFriend(user);
+                friends.setAdded(false);
                 mapper.save(friends);
             }
         };
-        Thread mythread = new Thread(runnable);
-        mythread.start();
+        Thread myThread = new Thread(runnable);
+        myThread.start();
         // Wait for thread to complete
         try {
-            mythread.join();
+            myThread.join();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
