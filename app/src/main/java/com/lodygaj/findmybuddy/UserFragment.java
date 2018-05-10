@@ -12,19 +12,14 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.amazonaws.mobile.client.AWSMobileClient;
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
-import com.amazonaws.services.dynamodbv2.model.GetItemRequest;
-import com.amazonaws.mobileconnectors.dynamodbv2.document.Table;
 import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBMapper;
 import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBQueryExpression;
 import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.PaginatedQueryList;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 
-import com.amazonaws.services.dynamodbv2.model.GetItemResult;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -35,9 +30,10 @@ import com.scaledrone.lib.Room;
 import com.scaledrone.lib.RoomListener;
 import com.scaledrone.lib.Scaledrone;
 
-import org.w3c.dom.Attr;
 
-import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,6 +50,7 @@ public class UserFragment extends Fragment implements RoomListener {
     private Button btnLastKnown, btnSendRequest;
     private ImageButton btnSendmessage;
     private EditText chatEdtTxt;
+    private ListView chatView;
     private String user, friend;
     private TextView txtUser;
 
@@ -61,11 +58,8 @@ public class UserFragment extends Fragment implements RoomListener {
 
     private AmazonDynamoDBClient dynamoDBClient;
     private DynamoDBMapper mapper;
-    private PaginatedQueryList<Message> result;
 
-    private ListView chatView;
     private MessageAdapter messageAdapter;
-
     private String channelID = "RAr1NhVD6XnYNC95";
     private String roomName;
     private Scaledrone scaledrone;
@@ -216,40 +210,69 @@ public class UserFragment extends Fragment implements RoomListener {
 
     // Retrieves chat messages from DynamoDb and populates list view
     public void getMessages() {
-        Message message = new Message();
-        message.setUser(user);
+        // Build query to get user messages sent to friend
+        Message userMessage = new Message();
+        userMessage.setUser(user);
 
-        Map<String, AttributeValue> attributeValues = new HashMap<>();
-        attributeValues.put(":friend", new AttributeValue(friend));
+        Map<String, AttributeValue> friendAttribute = new HashMap<>();
+        friendAttribute.put(":friend", new AttributeValue(friend));
 
-        // Build message query
-        final DynamoDBQueryExpression<Message> queryExpression = new DynamoDBQueryExpression<Message>()
-                .withHashKeyValues(message)
+        final DynamoDBQueryExpression<Message> userQueryExpression = new DynamoDBQueryExpression<Message>()
+                .withHashKeyValues(userMessage)
                 .withFilterExpression("friend = :friend")
-                .withExpressionAttributeValues(attributeValues);
+                .withExpressionAttributeValues(friendAttribute);
+
+        // Build query to get friend messages sent to user
+        Message friendMessage = new Message();
+        friendMessage.setUser(friend);
+
+        Map<String, AttributeValue> userAttribute = new HashMap<>();
+        userAttribute.put(":friend", new AttributeValue(user));
+
+        final DynamoDBQueryExpression<Message> friendQueryExpression = new DynamoDBQueryExpression<Message>()
+                .withHashKeyValues(friendMessage)
+                .withFilterExpression("friend = :friend")
+                .withExpressionAttributeValues(userAttribute);
 
         // Query messages from database
         Runnable runnable = new Runnable() {
             public void run() {
-                Boolean belongsToCurrentUser;
-                final MemberData data = new MemberData(user, getRandomColor());
-                List<Message> messageList = mapper.query(Message.class, queryExpression);
+                // Perform user message query
+                List<Message> userMessageList = mapper.query(Message.class, userQueryExpression);
+                // Perform friend message query
+                List<Message> friendMessageList = mapper.query(Message.class, friendQueryExpression);
+
+                // Add to lists together and sort by timestamp
+                ArrayList<Message> messageList = new ArrayList<>();
+                for(Message m: userMessageList) {
+                    messageList.add(m);
+                }
+                for(Message m: friendMessageList) {
+                    messageList.add(m);
+                }
+
+                if(messageList.size() > 0) {
+                    Collections.sort(messageList, new Comparator<Message>() {
+                        @Override
+                        public int compare(final Message object1, final Message object2) {
+                            return object1.getTimestamp().compareTo(object2.getTimestamp());
+                        }
+                    });
+                }
+
+                final MemberData userData = new MemberData(user, getRandomColor());
+                final MemberData friendData = new MemberData(friend, getRandomColor());
+                MessageData message;
 
                 for(Message m: messageList) {
                     if(m.getUser().equals(user)) {
-                        belongsToCurrentUser = true;
+                        message = new MessageData(m.getText(), userData, true);
                     } else {
-                        belongsToCurrentUser = false;
+                        message = new MessageData(m.getText(), friendData, false);
                     }
 
-                    final MessageData message = new MessageData(m.getText(), data, belongsToCurrentUser);
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            messageAdapter.add(message);
-                            chatView.setSelection(chatView.getCount() - 1);
-                        }
-                    });
+                    messageAdapter.add(message);
+                    chatView.setSelection(chatView.getCount() - 1);
                 }
             }
         };
