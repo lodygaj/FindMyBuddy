@@ -1,5 +1,8 @@
 package com.lodygaj.findmybuddy;
 
+/**
+ * Created on 4/16/2018.
+ */
 public class MessageData {
     private String text;
     private MemberData data;

@@ -7,13 +7,9 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.amazonaws.auth.CognitoCachingCredentialsProvider;
-import com.amazonaws.mobile.client.AWSMobileClient;
-import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBMapper;
-import com.amazonaws.regions.Regions;
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
-import com.google.firebase.iid.FirebaseInstanceId;
-
+/**
+ * Created on 6/29/2017.
+ */
 public class RegisterActivity extends AppCompatActivity {
     private EditText firstNameField;
     private EditText lastNameField;
@@ -23,7 +19,7 @@ public class RegisterActivity extends AppCompatActivity {
     private EditText passwordField;
     private EditText passwordConfirmField;
 
-    private DynamoDBMapper mapper;
+    private DDBHelper ddbHelper;
     private Boolean userTaken = true;
 
     @Override
@@ -41,17 +37,13 @@ public class RegisterActivity extends AppCompatActivity {
         passwordConfirmField = (EditText) findViewById(R.id.editTextPasswordConfirm);
 
         // Initialize Amazon DynamoDB client
-        AmazonDynamoDBClient dynamoDBClient = new AmazonDynamoDBClient(AWSMobileClient.getInstance().getCredentialsProvider());
-        this.mapper = DynamoDBMapper.builder()
-                .dynamoDBClient(dynamoDBClient)
-                .awsConfiguration(AWSMobileClient.getInstance().getConfiguration())
-                .build();
+        ddbHelper = new DDBHelper();
     }
 
     // Method called when "Register" button is clicked
     public void register(View view) {
         // Get user entries from edit text fields
-        final String username = usernameField.getText().toString();
+        String username = usernameField.getText().toString();
         String password = passwordField.getText().toString();
         String passwordConfirm = passwordConfirmField.getText().toString();
         String email = emailField.getText().toString();
@@ -66,31 +58,16 @@ public class RegisterActivity extends AppCompatActivity {
                 if(firstName.equals("") || lastName.equals("") || username.equals("")) {
                     Toast.makeText(getApplicationContext(), "All fields must be filled out!", Toast.LENGTH_LONG).show();
                 } else {
-//                    // Submit new user to database
-//                    new AsyncRegister(this).execute(username, password, email, firstName, lastName);
-
-                    // Determine if username is taken
-                    Runnable runnable = new Runnable() {
-                        public void run() {
-                            User user = mapper.load(User.class, username);
-                            if(user == null) {
-                                userTaken = false;
-                            }
-                        }
-                    };
-                    Thread mythread = new Thread(runnable);
-                    mythread.start();
-                    // Wait for thread to complete
-                    try {
-                        mythread.join();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
+                    // Submit new user to database
+                    User user = ddbHelper.getUser(username);
+                    if(user == null) {
+                        userTaken = false;
                     }
 
                     // Add user to database if username isn't taken
                     if(userTaken == false) {
                         // Create user object
-                        final User user = new User();
+                        user = new User();
                         user.setUsername(username);
                         user.setPassword(password);
                         user.setEmail(email);
@@ -100,14 +77,8 @@ public class RegisterActivity extends AppCompatActivity {
                         user.setLongitude(0.0);
                         user.setTimestamp("N/A");
 
-                        // Add user to database
-                        runnable = new Runnable() {
-                            public void run() {
-                                mapper.save(user);
-                            }
-                        };
-                        mythread = new Thread(runnable);
-                        mythread.start(); // Start thread
+                        // Add to users table
+                        ddbHelper.addUser(user);
 
                         // Set username in shared preferences
                         SaveSharedPreference.setUserName(getApplicationContext(), username);

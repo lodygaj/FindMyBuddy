@@ -10,7 +10,7 @@ import android.support.v4.content.ContextCompat;
 import android.widget.Toast;
 
 /**
- * Created by Joey Laptop on 6/8/2016.
+ * Created on 6/8/2016.
  */
 public class LocationFinder implements LocationListener {
     private Context context;

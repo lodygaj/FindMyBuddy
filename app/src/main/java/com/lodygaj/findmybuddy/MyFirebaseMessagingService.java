@@ -13,7 +13,7 @@ import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
 /**
- * Created by Joey Laptop on 2/28/2018.
+ * Created on 2/28/2018.
  */
 
 public class MyFirebaseMessagingService extends FirebaseMessagingService {

@@ -15,7 +15,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 /**
- * Created by Joey Laptop on 6/30/2017.
+ * Created on 6/30/2017.
  */
 public class MapFragment extends Fragment implements OnMapReadyCallback {
     private GoogleMap mMap;

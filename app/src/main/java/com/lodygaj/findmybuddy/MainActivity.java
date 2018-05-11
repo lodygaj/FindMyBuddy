@@ -7,19 +7,16 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.amazonaws.mobile.client.AWSMobileClient;
-import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBMapper;
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
-
-
+/**
+ * Created on 6/29/2017.
+ */
 public class MainActivity extends AppCompatActivity {
     private EditText usernameField;
     private EditText passwordField;
-    private User user;
-    private String username;
-    private String password;
 
-    private DynamoDBMapper mapper;
+    private User user;
+
+    private DDBHelper ddbHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,11 +32,7 @@ public class MainActivity extends AppCompatActivity {
         passwordField.setText("vigilante276");
 
         // Initialize Amazon DynamoDB client
-        AmazonDynamoDBClient dynamoDBClient = new AmazonDynamoDBClient(AWSMobileClient.getInstance().getCredentialsProvider());
-        this.mapper = DynamoDBMapper.builder()
-                .dynamoDBClient(dynamoDBClient)
-                .awsConfiguration(AWSMobileClient.getInstance().getConfiguration())
-                .build();
+        ddbHelper = new DDBHelper();
 
         // Check if user is already logged in
         if(SaveSharedPreference.getUserName(MainActivity.this).length() != 0) {
@@ -58,34 +51,26 @@ public class MainActivity extends AppCompatActivity {
     // Method called when "Login" button is clicked
     public void login(View view) {
         // Get username and password from fields
-        username = usernameField.getText().toString();
-        password = passwordField.getText().toString();
+        String username = usernameField.getText().toString();
+        String password = passwordField.getText().toString();
 
-        // Retrieve user data from database
-        Runnable runnable = new Runnable() {
-            public void run() {
-                user = mapper.load(User.class, username);
+        // Get user info from users table
+        if(username.length() > 0 && password.length() > 0) {
+            user = ddbHelper.getUser(username);
+
+            // Verify credentials
+            if(user != null && user.getPassword().equals(password)) {
+                // Set username in shared preferences
+                SaveSharedPreference.setUserName(getApplicationContext(), username);
+
+                // Start menu activity
+                Intent homeStartIntent = new Intent(getApplicationContext(), HomeActivity.class);
+                getApplicationContext().startActivity(homeStartIntent);
+            } else {
+                Toast.makeText(getApplicationContext(), "Wrong username or Password!", Toast.LENGTH_LONG).show();
             }
-        };
-        Thread myThread = new Thread(runnable);
-        myThread.start();
-        // Wait for thread to complete
-        try {
-            myThread.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        // Credentials successfully verified
-        if(user != null && user.getPassword().equals(password)) {
-            // Set username in shared preferences
-            SaveSharedPreference.setUserName(getApplicationContext(), username);
-
-            // Start menu activity
-            Intent homeStartIntent = new Intent(getApplicationContext(), HomeActivity.class);
-            getApplicationContext().startActivity(homeStartIntent);
         } else {
-            Toast.makeText(getApplicationContext(), "Wrong username or Password!", Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), "Must enter a username and Password!", Toast.LENGTH_LONG).show();
         }
     }
 

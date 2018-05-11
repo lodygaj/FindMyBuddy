@@ -7,7 +7,9 @@ import android.widget.RemoteViews;
 
 /**
  * Implementation of App Widget functionality.
+ * Created on 1/4/2016.
  */
+
 public class FindMyBuddyWidget extends AppWidgetProvider {
 
     static void updateAppWidget(Context context, AppWidgetManager appWidgetManager,

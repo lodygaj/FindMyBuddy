@@ -10,18 +10,16 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-import com.amazonaws.mobile.client.AWSMobileClient;
-import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBMapper;
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
-import com.google.firebase.iid.FirebaseInstanceId;
-
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+/**
+ * Created on 5/10/2018.
+ */
 public class HomeActivity extends AppCompatActivity {
     private FragmentManager fm;
-    private DynamoDBMapper mapper;
-    private User selectedUser;
+    private DDBHelper ddbHelper;
+    private User user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,14 +35,7 @@ public class HomeActivity extends AppCompatActivity {
         setFragment(new MenuFragment());
 
         // Initialize Amazon DynamoDB client
-        AmazonDynamoDBClient dynamoDBClient = new AmazonDynamoDBClient(AWSMobileClient.getInstance().getCredentialsProvider());
-        this.mapper = DynamoDBMapper.builder()
-                .dynamoDBClient(dynamoDBClient)
-                .awsConfiguration(AWSMobileClient.getInstance().getConfiguration())
-                .build();
-
-        // Create FCM Token
-        FirebaseInstanceId.getInstance().getToken();
+        ddbHelper = new DDBHelper();
     }
 
     // Menu icons are inflated just as they were with actionbar
@@ -67,26 +58,16 @@ public class HomeActivity extends AppCompatActivity {
         // Use switch to handle selected items
         switch(id) {
             case R.id.action_my_location:
-                // Show users last known location
+                // Get and show users last known location
                 getUserLocation(user);
                 break;
             case R.id.action_update_location:
-                // Get current latitude and longitude
-                LocationFinder locationFinder = new LocationFinder(this);
-                Double latitude = locationFinder.getLatitude();
-                Double longitude = locationFinder.getLongitude();
-                // Get timestamp
-                String timestamp = getTimestamp();
-                // Call method to update location
-                setUserLocation(user, latitude, longitude, timestamp);
+                // Set new user location
+                setUserLocation(user);
                 break;
             case R.id.action_logout:
-                // Log out
-                SaveSharedPreference.setUserName(this, "");
-                // Go to login screen
-                Intent mainStartIntent = new Intent(this, MainActivity.class);
-                startActivity(mainStartIntent);
-                this.finish();
+                // Logout of application
+                logout();
                 break;
         }
 
@@ -103,58 +84,31 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     // Method called to show users last known location
-    public void getUserLocation(final String user) {
-        // Get user info from database
-        Runnable runnable = new Runnable() {
-            public void run() {
-                selectedUser = mapper.load(User.class, user);
-            }
-        };
-        Thread mythread = new Thread(runnable);
-        mythread.start();
-        // Wait for thread to complete
-        try {
-            mythread.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        // Add user data to bundle
-        Bundle b = new Bundle();
-        b.putString("Friend", selectedUser.getUsername());
-        b.putDouble("Latitude", selectedUser.getLatitude());
-        b.putDouble("Longitude", selectedUser.getLongitude());
-        b.putString("Time", selectedUser.getTimestamp());
-
-        // Set map fragment
-        MapFragment mapFragment = new MapFragment();
-        mapFragment.setArguments(b); // set bundle
-        setFragment(mapFragment);
+    public void getUserLocation(String username) {
+        // Get user location from users table
+        user = ddbHelper.getUser(username);
+        // Switch to map fragment
+        setMapFragment(user);
     }
 
     // Method called to update a users location in database
-    public void setUserLocation(final String user, final Double latitude, final Double longitude, final String timestamp) {
-        // Update user in database
-        Runnable runnable = new Runnable() {
-            public void run() {
-                selectedUser = mapper.load(User.class, user);
-                selectedUser.setLatitude(latitude);
-                selectedUser.setLongitude(longitude);
-                selectedUser.setTimestamp(timestamp);
-                mapper.save(selectedUser);
-            }
-        };
-        Thread mythread = new Thread(runnable);
-        mythread.start();
-        // Wait for thread to complete
-        try {
-            mythread.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+    public void setUserLocation(String username) {
+        // Get current latitude, longitude and timestamp
+        LocationFinder locationFinder = new LocationFinder(this);
+        User user = new User();
+        user.setUsername(username);
+        user.setLatitude(locationFinder.getLatitude());
+        user.setLongitude(locationFinder.getLongitude());
+        user.setTimestamp(getTimestamp());
+
+        // Update user location in users table
+        ddbHelper.setUserLocation(user);
 
         // Toast user that update was successful
         Toast.makeText(getApplicationContext(), "Location updated!", Toast.LENGTH_LONG).show();
+
+        // Display updated location in map fragment
+        setMapFragment(user);
     }
 
     // Method gets a timestamp
@@ -162,9 +116,34 @@ public class HomeActivity extends AppCompatActivity {
         return new SimpleDateFormat("M/d/yy h:mm a").format(new Date());
     }
 
+    // Method called to update and set Map Fragment
+    public void setMapFragment(User user) {
+        // Add user data to bundle
+        Bundle b = new Bundle();
+        b.putString("Friend", user.getUsername());
+        b.putDouble("Latitude", user.getLatitude());
+        b.putDouble("Longitude", user.getLongitude());
+        b.putString("Time", user.getTimestamp());
+
+        // Set map fragment
+        MapFragment mapFragment = new MapFragment();
+        mapFragment.setArguments(b); // set bundle
+        setFragment(mapFragment);
+    }
+
     // Method called to update fragment
     public void setFragment(Fragment fragment) {
         fm.beginTransaction().replace(R.id.fl_content, fragment).addToBackStack(null).commit();
         fm.executePendingTransactions();
+    }
+
+    public void logout() {
+        // Log out
+        SaveSharedPreference.setUserName(this, "");
+
+        // Go to login screen
+        Intent mainStartIntent = new Intent(this, MainActivity.class);
+        startActivity(mainStartIntent);
+        this.finish();
     }
 }

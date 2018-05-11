@@ -1,14 +1,13 @@
 package com.lodygaj.findmybuddy;
 
-import android.support.annotation.NonNull;
-
 import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBAttribute;
 import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBHashKey;
-import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBIndexHashKey;
-import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBIndexRangeKey;
 import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBRangeKey;
 import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBTable;
 
+/**
+ * Created on 3/12/2018.
+ */
 @DynamoDBTable(tableName = "findmybuddy-mobilehub-1813168738-messages")
 public class Message {
     private String user;
@@ -16,9 +15,7 @@ public class Message {
     private String text;
     private String timestamp;
 
-    public Message() {
-
-    }
+    public Message() {}
 
     public Message(String user, String friend, String text, String timestamp) {
         this.user = user;
@@ -28,8 +25,6 @@ public class Message {
     }
 
     @DynamoDBHashKey(attributeName = "user")
-    @DynamoDBIndexHashKey(attributeName = "user", globalSecondaryIndexName = "user-friend-index")
-    @DynamoDBIndexRangeKey(attributeName = "user", globalSecondaryIndexName = "friend-user-index")
     public String getUser() {
         return user;
     }
@@ -38,8 +33,7 @@ public class Message {
         this.user = _user;
     }
 
-    @DynamoDBIndexHashKey(attributeName = "friend", globalSecondaryIndexName = "friend-user-index")
-    @DynamoDBIndexRangeKey(attributeName = "friend", globalSecondaryIndexName = "user-friend-index")
+    @DynamoDBAttribute(attributeName = "friend")
     public String getFriend() {
         return friend;
     }

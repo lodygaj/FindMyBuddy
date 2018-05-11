@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Created by Joey Laptop on 8/12/2017.
+ * Created on 8/12/2017.
  */
 @DynamoDBTable(tableName = "findmybuddy-mobilehub-1813168738-users")
 

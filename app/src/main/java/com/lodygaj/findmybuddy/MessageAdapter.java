@@ -12,11 +12,13 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
+/**
+ * Created on 4/16/2018.
+ */
 public class MessageAdapter extends BaseAdapter {
-    List<MessageData> messages = new ArrayList<>();
-    Context context;
+    private List<MessageData> messages = new ArrayList<>();
+    private Context context;
 
     public MessageAdapter(Context context) {
         this.context = context;

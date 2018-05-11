@@ -9,6 +9,9 @@ import com.amazonaws.mobile.client.AWSMobileClient;
 import com.amazonaws.mobileconnectors.pinpoint.PinpointConfiguration;
 import com.amazonaws.mobileconnectors.pinpoint.PinpointManager;
 
+/**
+ * Created on 6/29/2017.
+ */
 public class SplashActivity extends AppCompatActivity {
 
     public static PinpointManager pinpointManager;

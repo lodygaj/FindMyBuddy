@@ -8,7 +8,7 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 /**
- * Created by Joey Laptop on 1/4/2016.
+ * Created on 1/4/2016.
  */
 public class ContactAdapter extends BaseAdapter {
     Context context;

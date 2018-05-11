@@ -2,17 +2,13 @@ package com.lodygaj.findmybuddy;
 
 import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBAttribute;
 import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBHashKey;
-import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBIndexHashKey;
-import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBIndexRangeKey;
 import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBRangeKey;
 import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBTable;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+/**
+ * Created on 3/12/2018.
+ */
 @DynamoDBTable(tableName = "findmybuddy-mobilehub-1813168738-friends")
-
 public class Friends {
     private String _user;
     private String _friend;
